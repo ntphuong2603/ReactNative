@@ -24,11 +24,11 @@ export default class HomeScreen extends Component{
     }
 
     onSubmit = () => {
-        this.getArticleListBySearch()
+        this.getArticleListBySearch();
     }
 
     onSearchPress = () => {
-        this.getArticleListBySearch()
+        this.getArticleListBySearch();
     }
 
     getArticleListBySearch = () => {
@@ -38,12 +38,11 @@ export default class HomeScreen extends Component{
     }
 
     onSearchTextChange = (text) => {
-        this.setState({searchText: text})
+        this.setState({searchText: text});
     }
 
     onRefresh = () => {
-        this.setState({refreshing:true})
-        this.getArticleList().then(this.setState({refreshing:false}))
+        this.getArticleList();
     }
 
     getArticleList = () => {
@@ -66,10 +65,11 @@ export default class HomeScreen extends Component{
                 <ActivityIndicator size='large' color='black'/>
             )
         } else {
-            const {articleList, onRefresh, refreshing} = this.state;
+            const {articleList, refreshing} = this.state;
             const { navigation } = this.props
             return(
-                <ArticleList data={articleList} navigation={navigation} onRefresh={onRefresh} refreshing={refreshing}/>
+                <ArticleList data={articleList} navigation={navigation} 
+                    refreshing={refreshing} onRefresh={this.onRefresh}/>
             )
         }
     }

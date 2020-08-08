@@ -8,7 +8,7 @@ export default class ArticleList extends Component{
     }
 
     render(){
-        const { data, navigation, refreshing, onRefresh} = this.props;
+        const { data, navigation, refreshing, onRefresh, handleRefresh} = this.props;
         return(
             <FlatList
                 data={data}
