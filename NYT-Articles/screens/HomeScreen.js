@@ -24,11 +24,11 @@ export default class HomeScreen extends Component{
     }
 
     onSubmit = () => {
-        this.getArticleListBySearch();
+        this.getArticleListBySearch()
     }
 
     onSearchPress = () => {
-        this.getArticleListBySearch();
+        this.getArticleListBySearch()
     }
 
     getArticleListBySearch = () => {
@@ -38,11 +38,13 @@ export default class HomeScreen extends Component{
     }
 
     onSearchTextChange = (text) => {
-        this.setState({searchText: text});
+        this.setState({searchText: text})
     }
 
     onRefresh = () => {
+        this.setState({refreshing:true});
         this.getArticleList();
+        this.setState({refreshing:false});
     }
 
     getArticleList = () => {

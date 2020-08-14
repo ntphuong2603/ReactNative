@@ -12,7 +12,7 @@ export default class ArticleList extends Component{
         return(
             <FlatList
                 data={data}
-                keyExtractor={item=>item._id}
+                keyExtractor={item=>item.id}
                 renderItem={renderItems=><ArticleItem item={renderItems.item} navigation={navigation}/>}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}/>
         )
