@@ -1,27 +1,35 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TextInput, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 export default class DetailRecipe extends Component{
     constructor(props){
         super(props);
     }
     render(){
-        const {recipe} = this.props.route.params
+        const {recipe, backToSearch} = this.props
         return(
             <View style={styles.containter}>
-                <Text style={{fontWeight:'bold', fontSize: 15}}>Ingredient:</Text>
-                {recipe.ingredient.map((each,index)=>{
-                    return(
-                        <View key={index} style={{marginTop:10, marginBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent:'flex-start'}}>
-                            <Text style={{textAlign:'center', fontSize: 15, fontWeight: 'bold'}}>{index+1})</Text>
-                            <Text style={{fontSize: 15}}> {each} </Text>
-                        </View>
-                    )
-                })}
-                <Image style={styles.recipeImage} source={{uri:recipe.imgPath}}/>
-                <TouchableOpacity style={styles.btnGoBack} onPress={()=>this.props.navigation.goBack()}>
-                    <Text>Back to search</Text>
-                </TouchableOpacity>
+                {recipe !== null && <View>
+                    <View style={styles.headerTitle}>
+                        <TouchableOpacity onPress={backToSearch}>
+                            <MaterialIcons name='keyboard-arrow-left' size={35} color='#191970'/>
+                        </TouchableOpacity>
+                        <Text style={styles.txtRecipe}>Ingredient: <Text style={{color:'#6a5acd'}}>{recipe.key}</Text></Text>
+                    </View>
+                    {recipe.ingredient.map((each,index)=>{
+                        return(
+                            <View key={index} style={styles.recipeIngredient}>
+                                <Text style={{textAlign:'center', fontSize: 15, fontWeight: 'bold'}}>{index+1})</Text>
+                                <Text style={{fontSize: 15}}> {each} </Text>
+                            </View>
+                        )
+                    })}
+                    <Image style={styles.recipeImage} source={{uri:recipe.imgPath}}/>
+                    <TouchableOpacity style={styles.btnGoBack} onPress={backToSearch}>
+                        <Text>Back to search</Text>
+                    </TouchableOpacity>
+                </View>}
             </View>
         )
     }
@@ -34,36 +42,23 @@ const styles=StyleSheet.create({
         padding: 10,
         backgroundColor: 'white',
     },
-    recipe: {
-        flexDirection: 'column',
-        margin: 10,
+    headerTitle: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    styleInputText:{
-        borderWidth: 0.5,
-        borderRadius: 5,
-        height: 40,
-        padding: 5,
-        marginTop: 5,
-        marginBottom: 5,
-        fontSize: fontSizeBase + 3,
-    },
-    inputTextRecipe:{
-        borderWidth: 0.5,
-        borderRadius: 5,
-        height: 30,
-        padding: 5,
-        marginTop: 5,
-        marginBottom: 5,
-    },
-    recipeCode:{
-        fontSize: fontSizeBase + 5,
+    txtRecipe:{
+        flex:1,
+        fontSize: 15,
         fontWeight: 'bold',
+        color: '#663399',
+        textAlign: 'center',
     },
-    recipeName: {
-        fontSize: fontSizeBase + 2, 
-    },
-    recipeIngredient:{
-        fontSize: fontSizeBase,
+    recipeIngredient: {
+        marginTop:10, 
+        marginBottom: 10, 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        justifyContent:'flex-start'
     },
     recipeImage:{
         width: '100%',

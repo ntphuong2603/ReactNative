@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Alert } from 'react-native'
-import { MaterialCommunityIcons } from 'react-native-vector-icons/MaterialCommunityIcons'
-import * as Permissions from 'expo-permissions'
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Image, Alert, Animated, Dimensions } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
+import { Camera } from 'expo-camera';
 import { write_recipe, delete_recipe } from './recipe_io'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
 export default class InputRecipe extends Component{
     constructor(props){
@@ -20,6 +20,7 @@ export default class InputRecipe extends Component{
         this.handleRecipeName = this.handleRecipeName.bind(this);
         this.handleRecipeList = this.handleRecipeList.bind(this);
         this.handleRecipe = this.handleRecipe.bind(this);
+        this.position = new Animated.ValueXY(0,0)
     }
 
     handleRecipeName = (text, recipeType) => {
@@ -62,6 +63,22 @@ export default class InputRecipe extends Component{
 
     }
 
+    moveScreen = () => {
+        Animated.spring(this.position, {
+            toValue: {x: -SCREEN_WIDTH, y:0},
+            duration: 500,
+            useNativeDriver: false
+        }).start()
+    }
+
+    resetScreen = () => {
+        Animated.spring(this.position, {
+            toValue: {x: 0, y:0},
+            duration: 450,
+            useNativeDriver: false,
+        }).start()
+    }
+
     resetAllStates = () => {
         this.setState({
             recipeName: {
@@ -101,66 +118,110 @@ export default class InputRecipe extends Component{
         }
     }
 
+    takePicture = async() => {
+        try {
+            if (this.camera){
+                let photo = await this.camera.takePictureAsync();
+                //console.log(photo);
+                this.setState({imgUrl: photo.uri})
+                this.resetScreen();
+            }
+        } catch(error){
+            console.log(error);
+        }
+    }
+
     render(){
         const {recipeName, recipeList, imgUrl} = this.state;
         return(
-            <View style={styles.container}>
-                <Text style={{marginBottom: 10}}>Input recipe code and name</Text>
-                <View style={{flexDirection: 'row',}}>
-                    <TextInput
-                        style={styles.inputTextCode}
-                        onChangeText={(text) => this.handleRecipeName(text, 'code')}
-                        value={recipeName.code}
-                        placeholder='J80'/>
-                    <TextInput
-                        style={styles.inputTextName}
-                        value={recipeName.name}
-                        onChangeText={(text) => this.handleRecipeName(text, 'name')}
-                        placeholder='Bulgogi'/>
-                </View>
-                <Text style={{marginTop: 15, marginBottom: 10}}>Ingredient of : {recipeName.code} - {recipeName.name}</Text>
-                <View>
-                    <View style={{flexDirection: 'row'}}>
+            <Animated.View style={[styles.container, this.position.getLayout()]}>
+                <View style={styles.inputView}>
+                    <Text style={{marginBottom: 10}}>Input recipe code and name</Text>
+                    <View style={{flexDirection: 'row',}}>
                         <TextInput
-                            style={styles.inputTextIngredient}
-                            onChangeText={(text)=>this.handleRecipeName(text,'item')}
-                            value={recipeName.item}
-                            placeholder='Input ingredeint'/>
-                        <TouchableOpacity style={styles.btnAdd} onPress={this.handleRecipeList}>
-                            <Text style={{fontWeight:'bold', color:'red'}}>Add</Text>
-                        </TouchableOpacity>
+                            style={styles.inputTextCode}
+                            onChangeText={(text) => this.handleRecipeName(text, 'code')}
+                            value={recipeName.code}
+                            placeholder='J80'/>
+                        <TextInput
+                            style={styles.inputTextName}
+                            value={recipeName.name}
+                            onChangeText={(text) => this.handleRecipeName(text, 'name')}
+                            placeholder='Bulgogi'/>
                     </View>
-                    <ScrollView style={{height:'78%'}}>
-                        {recipeList.map((value,index)=>{
-                            return(
-                                <View key={index}>
-                                    <Text style={{marginTop: 5, fontSize: 15}}>{index+1}) {value}</Text>
-                                </View>
-                            )
-                        })}
-                        <Text style={{marginTop: 10, fontSize: 15, fontWeight: 'bold'}}>Illustration</Text>
-                        <View style={{flexDirection: 'row', justifyContent:'space-around'}}>
-                            <TouchableOpacity style={styles.imgContainer} onPress={this.getImageFromGallery}>
-                                {imgUrl.length>0 && <Image source={{uri: imgUrl}} style={styles.img}/>}
-                                <Text style={styles.btnImgText}>Insert picture</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.imgContainer} onPress={this.takePictureFromCamera}>
-                                {imgUrl.length>0 && <Image source={{uri: imgUrl}} style={styles.img}/>}
-                                <Text style={styles.btnImgText}>Take image</Text>
+                    <Text style={{marginTop: 15, marginBottom: 10}}>Ingredient of : {recipeName.code} - {recipeName.name}</Text>
+                    <View>
+                        <View style={{flexDirection: 'row'}}>
+                            <TextInput
+                                style={styles.inputTextIngredient}
+                                onChangeText={(text)=>this.handleRecipeName(text,'item')}
+                                value={recipeName.item}
+                                placeholder='Input ingredeint'/>
+                            <TouchableOpacity style={styles.btnAdd} onPress={this.handleRecipeList}>
+                                <Text style={{fontWeight:'bold', color:'red'}}>Add</Text>
                             </TouchableOpacity>
                         </View>
-                        {recipeName.code.length>0 && <TouchableOpacity style={styles.btnDone} onPress={this.handleRecipe}>
-                            <Text style={styles.btnDoneText}>F * I * N * I * S * H</Text>
-                        </TouchableOpacity>}
-                    </ScrollView>
+                        <ScrollView style={{height:'78%'}}>
+                            {recipeList.map((value,index)=>{
+                                return(
+                                    <View key={index}>
+                                        <Text style={{marginTop: 5, fontSize: 15}}>{index+1}) {value}</Text>
+                                    </View>
+                                )
+                            })}
+                            <Text style={{marginTop: 10, fontSize: 15, fontWeight: 'bold'}}>Illustration</Text>
+                            <View style={{flexDirection: 'column', justifyContent:'space-around'}}>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
+                                    <TouchableOpacity onPress={this.getImageFromGallery}>
+                                        <FontAwesome name='file-picture-o' size={30} color='#00bfff'/>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={this.moveScreen}>
+                                        <FontAwesome name='camera' size={30} color='#00ced1'/>
+                                    </TouchableOpacity>
+                                </View>
+                                {imgUrl.length>0 && <Image source={{uri: imgUrl}} style={styles.img}/>}
+                            </View>
+                            {recipeName.code.length>0 && <TouchableOpacity style={styles.btnDone} onPress={this.handleRecipe}>
+                                <Text style={styles.btnDoneText}>F * I * N * I * S * H</Text>
+                            </TouchableOpacity>}
+                        </ScrollView>
+                    </View>
                 </View>
-            </View>
+                <View style={styles.cameraView}>
+                    <Camera style={{width: '100%', height: 300}} type={Camera.Constants.Type.back} ref={ref=>this.camera = ref}/>
+                    <TouchableOpacity style={styles.btnGoBack} onPress={this.takePicture}>
+                    <FontAwesome name='camera' size={35}/>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.btnGoBack} onPress={this.resetScreen}>
+                    <FontAwesome name='arrow-circle-left' size={35}/>
+                    </TouchableOpacity>
+                </View>
+            </Animated.View>
         )
     }
 }
 
+const SCREEN_WIDTH = Dimensions.get('screen').width;
+
 const styles=StyleSheet.create({
     container:{
+        height: '100%',
+        width: '100%',
+        flexDirection: 'row',
+    },
+    inputView:{
+        width: '100%',
+        height: '100%',
+        borderEndWidth: 1,
+        borderColor: 'blue',
+    },
+    cameraView:{
+        width: "100%",
+        height: '100%',
+        marginLeft: 10,
+        borderColor: 'red',
+        borderWidth: 1,
+        position: 'relative',
     },
     inputTextCode:{
         borderRadius: 5,
@@ -205,7 +266,7 @@ const styles=StyleSheet.create({
         width: '45%'
     },
     img:{
-        height: 250, 
+        height: 300, 
         resizeMode:'contain', 
         marginTop: 5,
     },
@@ -235,5 +296,15 @@ const styles=StyleSheet.create({
         textAlign: 'center',
         paddingTop: 5,
         paddingBottom: 5,
+    },
+    btnGoBack:{
+        marginTop: 10,
+        height: 50,
+        borderRadius: 10,
+        borderColor: 'blue',
+        borderWidth: 0.75,
+        backgroundColor: '#c0c0c0',
+        alignItems: 'center',
+        justifyContent: 'center',
     }
 })

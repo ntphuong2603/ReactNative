@@ -1,31 +1,62 @@
-import React, { Component, useContext } from 'react'
-import { View, Text, StyleSheet, AsyncStorage, TextInput, Image, TouchableOpacity, ScrollView, Keyboard} from 'react-native'
+import React, { Component } from 'react'
+import { View, Text, StyleSheet, AsyncStorage, TextInput, Image, TouchableOpacity, ScrollView, Keyboard, Animated, PanResponder, Dimensions} from 'react-native'
 import { MaterialIcons } from 'react-native-vector-icons'
 import AppContext from './shareData'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import RecipeItem from './recipeItem'
+import DetailRecipe from './detailRecipe'
+import EditRecipe from './editRecipe'
 
 export default class SearchRecipe extends Component{
-    static contextType = AppContext;
-
     constructor(props){
         super(props)
         this.state = {
             searchText: '',
             recipeList: [],
-            searchResults: [],
+            searchResults: this.props.searchResults,
+            handleSearchResults: this.props.handleSearchResults, 
+            scrollEnabled: true,
+            isViewDetail: true,
+            recipeItem: null,
         }
         this.handleSearchText = this.handleSearchText.bind(this);
+        this.handleScrollEnable = this.handleScrollEnable.bind(this);
+        this.handleRecipeItem = this.handleRecipeItem.bind(this);
+        this.position = new Animated.ValueXY(0,0)
+    }
+
+    moveScreen = () => {
+        Animated.spring(this.position, {
+            toValue: {x: -SCREEN_WIDTH, y:0},
+            duration: 500,
+            useNativeDriver: false
+        }).start()
+    }
+
+    resetScreen = () => {
+        Animated.spring(this.position, {
+            toValue: {x: 0, y:0},
+            duration: 450,
+            useNativeDriver: false,
+        }).start()
     }
 
     async componentDidMount(){
         const list = await AsyncStorage.getAllKeys();
-        this.setState({recipeList: list, ...this.context})
-        //console.log('Comp Did Mount: ', this.context);
-        //console.log('componentDidMoutn: ', useContext(AppContext))
+        this.setState({recipeList: list})
     }
 
     handleSearchText(text){
         this.setState({searchText: text})
+    }
+
+    handleScrollEnable(){
+        const { scrollEnabled } = this.state;
+        this.setState({scrollEnabled: !scrollEnabled})
+    }
+
+    handleRecipeItem(recipe,isViewDetail){
+        this.setState({recipeItem: recipe, isViewDetail: isViewDetail})
+        this.moveScreen()
     }
 
     handleSearchResult = async ()=>{
@@ -72,103 +103,79 @@ export default class SearchRecipe extends Component{
     }
 
     render(){
-        const { searchText, searchResults } = this.state
+        const { searchText, searchResults, scrollEnabled, recipeItem, isViewDetail } = this.state
         return(
-            <View style={styles.container}>
-                <View style={styles.searchContainer}>
-                    <TextInput
-                        style={styles.searchText}
-                        value={searchText}
-                        placeholder='Code or name of recipe ...'
-                        onChangeText={this.handleSearchText}/>
-                    <TouchableOpacity style={styles.btnSearchContainer} onPress={this.handleSearchResult}>
-                        <MaterialIcons name='search' color='gray' size={45}/>
-                    </TouchableOpacity>
+            <Animated.View style={[this.position.getLayout()]}>
+                <View style={styles.container}>
+                    <View style={styles.searchView}>
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                style={styles.searchText}
+                                value={searchText}
+                                placeholder='Code or name of recipe ...'
+                                onChangeText={this.handleSearchText}/>
+                            <TouchableOpacity style={styles.btnSearch} onPress={this.handleSearchResult}>
+                                <MaterialIcons name='search' color='gray' size={45}/>
+                            </TouchableOpacity>
+                        </View>
+                        <View>
+                            {searchResults.length>0 && <TouchableOpacity style={styles.btnClear} onPress={()=>this.setState({searchResults:[]})}>
+                                <Text style={{color: 'white', fontWeight: 'bold'}}> Clear search history</Text>
+                            </TouchableOpacity>}
+                            <ScrollView scrollEnabled={scrollEnabled}>
+                                {searchResults.map((recipe, index)=>{
+                                    return(
+                                        <RecipeItem key={index} recipe={recipe} index={index}
+                                            handleScrollEnable={this.handleScrollEnable}
+                                            handleRecipeItem={this.handleRecipeItem}/>
+                                    )
+                                })}
+                            </ScrollView>
+                        </View>
+                    </View>
+                    <View style={styles.itemView}>
+                        {isViewDetail && <DetailRecipe recipe={recipeItem} backToSearch={this.resetScreen}/>}
+                        {!isViewDetail && <EditRecipe recipe={recipeItem} backToSearch={this.resetScreen}/>}
+                    </View>
                 </View>
-                <View>
-                    {searchResults.length>0 && <TouchableOpacity style={styles.btnClear} onPress={()=>this.setState({searchResults:[]})}>
-                        <Text style={{color: 'white', fontWeight: 'bold'}}> Clear search history</Text>
-                    </TouchableOpacity>}
-                    <ScrollView>
-                        {searchResults.map((recipe, index)=>{
-                            return(
-                                <View key={index} style={styles.searchView}>
-                                    <View style={styles.searchResultContainer} >
-                                        <View style={styles.searchResultTextArea}>
-                                            <Text style={{fontSize: 18}}>Code: {recipe['key'].split('-')[0].trim()}</Text>
-                                            <Text style={{fontSize: 13}}>Name: {recipe.key.split('-')[1].trim()}</Text>
-                                            <TouchableOpacity style={styles.btnIngredient} onPress={()=>{this.props.navigation.navigate('DetailRecipe',{'recipe':searchResults[index]})}}>
-                                                <Text style={styles.txtIngredient}>Ingredient: ...</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                        <TouchableOpacity style={styles.searchResultImageCon} onPress={()=>{this.props.navigation.navigate('EditRecipe',{'recipe':searchResults[index]})}}>
-                                            <Image style={styles.searchResultImage} source={{uri:recipe.imgPath}}/>
-                                            <Text style={styles.txtEdit}>Edit recipe</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            )
-                        })}
-                    </ScrollView>
-                </View>
-            </View>
+            </Animated.View>
         )
     }
 }
 
+const SCREEN_WIDTH = Dimensions.get('screen').width;
+//const SCREEN_HEIGHT = Dimensions.get('screen').height;
+
 const styles=StyleSheet.create({
     container:{
         height: '100%',
-        backgroundColor: 'white',
+        width: '100%',
+        flexDirection: 'row',
     },
     searchView:{
-        marginTop: 10,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-
+        width: '100%',
+        height: '100%',
+    },
+    itemView:{
+        width: "100%",
+        height: '100%',
+        marginLeft: 10,
+        position: 'relative',
     },
     searchContainer:{
-        height: 40,
         borderRadius: 10,
-        borderColor: 'black',
+        borderColor: 'gray',
         borderWidth: 0.5,
-        justifyContent: 'center',
         alignItems: 'center',
         flexDirection: 'row',
-        height: 55,
+        height: 45,
     },
     searchText:{
-        fontSize: 15,
-        marginLeft: 10,
-        width: '82%',
-    },
-    btnSearchContainer:{
-    },
-    searchResultContainer:{
-        flexDirection: 'row',
-        paddingLeft: 10,
-        paddingRight: 10,
-    },
-    searchResultTextArea:{
-        width: '65%',
-        justifyContent: 'space-evenly',
-    },
-    searchResultText:{
         fontSize: 20,
+        width: '86%',
+        marginLeft: 5,
     },
-    searchResultImageCon:{
-        height: 100,
-        width: '35%',
-        borderRadius: 15,
-        borderColor: 'red',
-        borderWidth: 0.7,
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-    },
-    searchResultImage:{
-        height: '100%',
-        width: '100%',
-        borderRadius: 15,
+    btnSearch:{
     },
     btnClear:{
         borderRadius: 10,
@@ -179,15 +186,4 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         padding: 10,
     },
-    btnIngredient:{
-        marginRight: 10,
-    },
-    txtIngredient:{
-        color: '#c0c0c0',
-    },
-    txtEdit:{
-        position: 'absolute',
-        fontSize: 10,
-        color: 'white',
-    }
 })
