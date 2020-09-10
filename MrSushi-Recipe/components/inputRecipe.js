@@ -51,7 +51,7 @@ export default class InputRecipe extends Component{
 
     getImageFromGallery = async () => {
         const res = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            mediaTypes: ImagePicker.MediaTypeOptions.photo,
             allowsEditing: true,
         })
         if (!res.cancelled){
@@ -59,8 +59,16 @@ export default class InputRecipe extends Component{
         }
     }
 
-    takePictureFromCamera = async () => {
-
+    takePictureFromCamera = async() => {
+        try {
+            if (this.camera){
+                let photo = await this.camera.takePictureAsync();
+                this.setState({imgUrl: photo.uri})
+                this.resetScreen();
+            }
+        } catch(error){
+            console.log(error);
+        }
     }
 
     moveScreen = () => {
@@ -118,19 +126,6 @@ export default class InputRecipe extends Component{
         }
     }
 
-    takePicture = async() => {
-        try {
-            if (this.camera){
-                let photo = await this.camera.takePictureAsync();
-                //console.log(photo);
-                this.setState({imgUrl: photo.uri})
-                this.resetScreen();
-            }
-        } catch(error){
-            console.log(error);
-        }
-    }
-
     render(){
         const {recipeName, recipeList, imgUrl} = this.state;
         return(
@@ -150,50 +145,49 @@ export default class InputRecipe extends Component{
                             placeholder='Bulgogi'/>
                     </View>
                     <Text style={{marginTop: 15, marginBottom: 10}}>Ingredient of : {recipeName.code} - {recipeName.name}</Text>
-                    <View>
-                        <View style={{flexDirection: 'row'}}>
-                            <TextInput
-                                style={styles.inputTextIngredient}
-                                onChangeText={(text)=>this.handleRecipeName(text,'item')}
-                                value={recipeName.item}
-                                placeholder='Input ingredeint'/>
-                            <TouchableOpacity style={styles.btnAdd} onPress={this.handleRecipeList}>
-                                <Text style={{fontWeight:'bold', color:'red'}}>Add</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <ScrollView style={{height:'78%'}}>
-                            {recipeList.map((value,index)=>{
-                                return(
-                                    <View key={index}>
-                                        <Text style={{marginTop: 5, fontSize: 15}}>{index+1}) {value}</Text>
-                                    </View>
-                                )
-                            })}
-                            <Text style={{marginTop: 10, fontSize: 15, fontWeight: 'bold'}}>Illustration</Text>
-                            <View style={{flexDirection: 'column', justifyContent:'space-around'}}>
-                                <View style={{flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center'}}>
-                                    <TouchableOpacity onPress={this.getImageFromGallery}>
-                                        <FontAwesome name='file-picture-o' size={30} color='#00bfff'/>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={this.moveScreen}>
-                                        <FontAwesome name='camera' size={30} color='#00ced1'/>
-                                    </TouchableOpacity>
-                                </View>
-                                {imgUrl.length>0 && <Image source={{uri: imgUrl}} style={styles.img}/>}
-                            </View>
-                            {recipeName.code.length>0 && <TouchableOpacity style={styles.btnDone} onPress={this.handleRecipe}>
-                                <Text style={styles.btnDoneText}>F * I * N * I * S * H</Text>
-                            </TouchableOpacity>}
-                        </ScrollView>
+                    <View style={{flexDirection: 'row'}}>
+                        <TextInput
+                            style={styles.inputTextIngredient}
+                            onChangeText={(text)=>this.handleRecipeName(text,'item')}
+                            value={recipeName.item}
+                            placeholder='Input ingredeint'/>
+                        <TouchableOpacity style={styles.btnAdd} onPress={this.handleRecipeList}>
+                            <Text style={{fontWeight:'bold', color:'red'}}>Add</Text>
+                        </TouchableOpacity>
                     </View>
+                    <ScrollView style={{height:'78%'}}>
+                        {recipeList.map((value,index)=>{
+                            return(
+                                <View key={index}>
+                                    <Text style={{marginTop: 5, fontSize: 15}}>{index+1}) {value}</Text>
+                                </View>
+                            )
+                        })}
+                        <Text style={{marginTop: 10, fontSize: 15, fontWeight: 'bold'}}>Illustration</Text>
+                        <View style={styles.picView}>
+                            <View style={styles.btnGroup}>
+                                <TouchableOpacity style={[styles.btnIll, {borderColor: '#00bfff'}]} onPress={this.getImageFromGallery}>
+                                    <FontAwesome name='file-picture-o' size={30} color='#00bfff'/>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.btnIll,{borderColor: '#daa520'}]} onPress={this.moveScreen}>
+                                    <FontAwesome name='camera' size={30} color='#daa520'/>
+                                </TouchableOpacity>
+                            </View>
+                            {imgUrl.length>0 && <Image source={{uri: imgUrl}} style={styles.img}/>}
+                        </View>
+                        {recipeName.code.length>0 && <TouchableOpacity style={styles.btnDone} onPress={this.handleRecipe}>
+                            <Text style={styles.btnDoneText}>F * I * N * I * S * H</Text>
+                        </TouchableOpacity>}
+                    </ScrollView>
                 </View>
                 <View style={styles.cameraView}>
-                    <Camera style={{width: '100%', height: 300}} type={Camera.Constants.Type.back} ref={ref=>this.camera = ref}/>
-                    <TouchableOpacity style={styles.btnGoBack} onPress={this.takePicture}>
-                    <FontAwesome name='camera' size={35}/>
-                    </TouchableOpacity>
                     <TouchableOpacity style={styles.btnGoBack} onPress={this.resetScreen}>
-                    <FontAwesome name='arrow-circle-left' size={35}/>
+                        <FontAwesome name='arrow-circle-left' size={35} color='#6495ed'/>
+                        <Text> Go back</Text>
+                    </TouchableOpacity>
+                    <Camera style={{width: '100%', height: 300}} type={Camera.Constants.Type.back} ref={ref=>this.camera = ref}/>
+                    <TouchableOpacity style={styles.btnCamera} onPress={this.takePictureFromCamera}>
+                        <FontAwesome name='camera' size={35} color='#daa520'/>
                     </TouchableOpacity>
                 </View>
             </Animated.View>
@@ -212,15 +206,11 @@ const styles=StyleSheet.create({
     inputView:{
         width: '100%',
         height: '100%',
-        borderEndWidth: 1,
-        borderColor: 'blue',
     },
     cameraView:{
         width: "100%",
         height: '100%',
         marginLeft: 10,
-        borderColor: 'red',
-        borderWidth: 1,
         position: 'relative',
     },
     inputTextCode:{
@@ -259,52 +249,66 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
-    imgContainer:{
-        borderRadius: 20,
-        borderColor: 'red',
-        borderWidth: 0.5,
-        width: '45%'
+    picView:{
+        flexDirection: 'column', 
+        justifyContent:'space-around',
+    },
+    btnGroup:{
+        flexDirection: 'row', 
+        justifyContent: 'space-around', 
+        marginBottom: 10,
+    },
+    btnIll:{
+        borderWidth: 1,
+        width: '45%',
+        borderRadius: 10,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     img:{
-        height: 300, 
-        resizeMode:'contain', 
-        marginTop: 5,
+        width: '100%',
+        height: 300,
+        resizeMode: 'contain',
+        borderColor: '#4b0082',
+        borderRadius: 20,
+        borderWidth: 0.7,
+        marginBottom: 10,
     },
     btnDone:{
+        borderWidth: 1,
         borderRadius: 10,
-        borderColor: 'green',
-        borderWidth: 0.5,
-        backgroundColor: 'green',
-        marginTop: 5,
-        marginBottom: 5,
+        height: 50,
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 10,
+        borderColor: 'red',
+        backgroundColor: '#e6e6fa'
     },
     btnDoneText:{
         fontSize: 20,
         fontWeight: 'bold',
-        color: 'white',
-    },
-    btnImg: {
-        backgroundColor: 'transparent',
-        borderWidth: 0.5,
-        borderRadius: 7,
-    },
-    btnImgText:{
-        color: 'gray',
-        textAlign: 'center',
-        paddingTop: 5,
-        paddingBottom: 5,
+        color: '#4b0082',
     },
     btnGoBack:{
-        marginTop: 10,
+        margin: 10,
         height: 50,
         borderRadius: 10,
         borderColor: 'blue',
         borderWidth: 0.75,
-        backgroundColor: '#c0c0c0',
+        backgroundColor: '#f0ffff',
         alignItems: 'center',
         justifyContent: 'center',
-    }
+        flexDirection: 'row',
+    },
+    btnCamera:{
+        margin: 10,
+        height: 50,
+        borderRadius: 10,
+        borderColor: '#ff0000',
+        borderWidth: 0.75,
+        backgroundColor: '#f5deb3',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+    },
 })

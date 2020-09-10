@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, AsyncStorage, TextInput, Image, TouchableOpacity, ScrollView, Keyboard, Animated, PanResponder, Dimensions} from 'react-native'
 import { MaterialIcons } from 'react-native-vector-icons'
-import AppContext from './shareData'
 import RecipeItem from './recipeItem'
 import DetailRecipe from './detailRecipe'
 import EditRecipe from './editRecipe'

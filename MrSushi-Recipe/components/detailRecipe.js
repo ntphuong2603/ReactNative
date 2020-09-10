@@ -13,9 +13,12 @@ export default class DetailRecipe extends Component{
                 {recipe !== null && <View>
                     <View style={styles.headerTitle}>
                         <TouchableOpacity onPress={backToSearch}>
-                            <MaterialIcons name='keyboard-arrow-left' size={35} color='#191970'/>
+                            <MaterialIcons name='keyboard-arrow-left' size={45} color='#191970'/>
                         </TouchableOpacity>
-                        <Text style={styles.txtRecipe}>Ingredient: <Text style={{color:'#6a5acd'}}>{recipe.key}</Text></Text>
+                        <View style={styles.headerStyle}>
+                            <Text style={styles.txtRecipe}>Ingredient</Text>
+                            <Text style={{fontSize: 18,color:'#6a5acd'}}>{recipe.key}</Text>
+                        </View>
                     </View>
                     {recipe.ingredient.map((each,index)=>{
                         return(
@@ -46,12 +49,17 @@ const styles=StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
+    headerStyle:{
+        flexDirection: 'column', 
+        height: 55, 
+        alignItems: 'center', 
+        flex: 1,
+    },
     txtRecipe:{
         flex:1,
         fontSize: 15,
         fontWeight: 'bold',
         color: '#663399',
-        textAlign: 'center',
     },
     recipeIngredient: {
         marginTop:10, 
