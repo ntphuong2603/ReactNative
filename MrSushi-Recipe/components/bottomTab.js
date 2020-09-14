@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
 
 export default class BottomTab extends Component{
     constructor(props){
@@ -10,12 +10,12 @@ export default class BottomTab extends Component{
         const {selectedTab, tabList, handleSelectTab} = this.props
         return(
             <View style={styles.container}>
-                {Object.keys(tabList).map(eachKey=>{
+                {Object.keys(tabList).map((eachKey, index)=>{
                     const tabName = tabList[eachKey];
                     return(
-                        <TouchableOpacity key={eachKey} onPress={handleSelectTab.bind(this, tabList[eachKey])}
-                            style={[styles.tabItem, (selectedTab===tabList[eachKey]? {backgroundColor:'red'}:null)]}>
-                            <Text style={[styles.tabText,(selectedTab===tabList[eachKey]? {color:'white', fontWeight:'bold'}:null)]}>{tabName[0].toUpperCase()+tabName.substr(1,).toLowerCase()}</Text>
+                        <TouchableOpacity key={eachKey} onPress={handleSelectTab.bind(this, index)}
+                            style={[styles.tabItem, (selectedTab===index? {backgroundColor:'red'}:null)]}>
+                            <Text style={[styles.tabText,(selectedTab===index? {color:'white', fontWeight:'bold'}:null)]}>{tabName[0].toUpperCase()+tabName.substr(1,).toLowerCase()}</Text>
                         </TouchableOpacity>
                         )
                 })}
@@ -23,6 +23,8 @@ export default class BottomTab extends Component{
         )
     }
 }
+
+const SCREEN_WIDTH = Dimensions.get('screen').width;
 
 const styles=StyleSheet.create({
     container:{
@@ -38,7 +40,7 @@ const styles=StyleSheet.create({
     tabItem:{
         borderRadius: 14,
         height: '95%',
-        width: '49%',
+        width: Math.floor(SCREEN_WIDTH/3.3),
         justifyContent: 'center',
         alignItems: 'center',
         margin: 1,

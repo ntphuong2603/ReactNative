@@ -1,21 +1,30 @@
 import 'react-native-gesture-handler';
 import React, { Component } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { SearchRecipe, InputRecipe, EditRecipe, BottomTab} from './components/componentsIndex';
-import { createStackNavigator } from '@react-navigation/stack';
+import { AsyncStorage, StyleSheet, View } from 'react-native';
+import { SearchRecipe, InputRecipe, BottomTab} from './components/componentsIndex';
 import { Camera } from 'expo-camera';
+import OrderRecipe from './components/orderRecipe';
+
+const TAB_LIST = ['order', 'search', 'input']
 
 export default class App extends Component {
   constructor(props){
     super(props)
     this.state={
-      selectedTab:'search',
+      selectedTab:0,
       searchResults: [],
+      orderList: [],
+      recipeList: []
     }
     this.handleSelectTab = this.handleSelectTab.bind(this);
   }
 
-  componentDidMount(){
+  async componentDidMount(){
+    await AsyncStorage.getAllKeys().then(results=>{
+      console.log(results);
+      this.setState({recipeList: results})
+    })
+    
     const permissions = Camera.requestPermissionsAsync();
     if (permissions.status === 'granted'){
       console.log('Camear access granted');
@@ -32,17 +41,20 @@ export default class App extends Component {
     this.setState({searchResults: searchResults});
   }
 
+  handleOrderList = (orderList) => {
+    this.setState({orderList: orderList});
+  }
+
   render(){
-    const {selectedTab, viewItem, recipeItem} = this.state;
-    const Stack=createStackNavigator();
-    
+    const {selectedTab, recipeList, searchResults, orderList} = this.state;
     return (
       <View style={styles.container}>
         <View style={styles.mainContainer}>
-          {selectedTab==='search' && <SearchRecipe searchResults={this.state.searchResults} handleSearchResults={this.handleSearchResults}/>}
-          {selectedTab==='input' && <InputRecipe/>}
+          {selectedTab===0 && <OrderRecipe recipeList={recipeList} handleOrderList={this.handleOrderList} orderList={orderList}/>}
+          {selectedTab===1 && <SearchRecipe recipeList={recipeList} searchResults={searchResults} handleSearchResults={this.handleSearchResults}/>}
+          {selectedTab===2 && <InputRecipe />}
         </View>
-        <BottomTab selectedTab={selectedTab} tabList={['search', 'input']} handleSelectTab={this.handleSelectTab}/>
+        <BottomTab selectedTab={selectedTab} tabList={TAB_LIST} handleSelectTab={this.handleSelectTab}/>
       </View>
     )
   }

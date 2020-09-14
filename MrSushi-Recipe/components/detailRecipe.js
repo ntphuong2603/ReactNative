@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 export default class DetailRecipe extends Component{
@@ -20,18 +21,21 @@ export default class DetailRecipe extends Component{
                             <Text style={{fontSize: 18,color:'#6a5acd'}}>{recipe.key}</Text>
                         </View>
                     </View>
-                    {recipe.ingredient.map((each,index)=>{
-                        return(
-                            <View key={index} style={styles.recipeIngredient}>
-                                <Text style={{textAlign:'center', fontSize: 15, fontWeight: 'bold'}}>{index+1})</Text>
-                                <Text style={{fontSize: 15}}> {each} </Text>
-                            </View>
-                        )
-                    })}
-                    <Image style={styles.recipeImage} source={{uri:recipe.imgPath}}/>
+                    <ScrollView style={styles.ingredientView}>
+                        {recipe.ingredient.map((each,index)=>{
+                            return(
+                                <View key={index} style={styles.recipeIngredient}>
+                                    <Text style={{textAlign:'center', fontSize: 15, fontWeight: 'bold'}}>{index+1})</Text>
+                                    <Text style={{fontSize: 15}}> {each} </Text>
+                                </View>
+                            )
+                        })}
+                    <Image style={styles.recipeImage} 
+                        source={recipe.imgPath.length===0?require('../assets/MrSushi_Food_Image.jpg'):{uri:recipe.imgPath}}/>
                     <TouchableOpacity style={styles.btnGoBack} onPress={backToSearch}>
                         <Text>Back to search</Text>
                     </TouchableOpacity>
+                    </ScrollView>
                 </View>}
             </View>
         )
@@ -41,9 +45,9 @@ const fontSizeBase = 12;
 
 const styles=StyleSheet.create({
     containter:{
-        flex: 1,
         padding: 10,
         backgroundColor: 'white',
+        height: '100%'
     },
     headerTitle: {
         flexDirection: 'row',
@@ -54,6 +58,9 @@ const styles=StyleSheet.create({
         height: 55, 
         alignItems: 'center', 
         flex: 1,
+    },
+    ingredientView: {
+        height: '93%',
     },
     txtRecipe:{
         flex:1,
