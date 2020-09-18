@@ -48,6 +48,7 @@ export default class OrderRecipe extends Component{
         } else {
             this.props.handleOrderList([])
         }
+        Keyboard.dismiss();
     }
 
     handleOrderSelected = (orderSelected) => {
@@ -65,9 +66,11 @@ export default class OrderRecipe extends Component{
                         <TextInput
                             style={styles.searchText}
                             value={orderListText}
-                            placeholder='Input order list ...'
+                            placeholder='Input a list of orders ...'
                             onChangeText={this.handleOrderListText}
-                            keyboardType='numeric'/>
+                            keyboardType='numeric'
+                            clearButtonMode='always'
+                            />
                         <TouchableOpacity style={styles.btnSearch} onPress={this.handleSearchResults}>
                             <MaterialIcons name='search' color='gray' size={45}/>
                         </TouchableOpacity>
@@ -87,6 +90,9 @@ export default class OrderRecipe extends Component{
                                 source={orderItem.imgPath.length===0 ? require('../assets/MrSushi_Food_Image.jpg') : {uri: orderItem.imgPath}}/>
                         </View>}
                     </View>
+                </View>
+                <View>
+
                 </View>
             </View>
         )

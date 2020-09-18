@@ -71,7 +71,7 @@ const styles=StyleSheet.create({
     marginTop: 30,
   },
   mainContainer:{
-    height: '92%',
+    height: '90%',
     margin: 5,
     marginBottom: 0,
   }

@@ -15,11 +15,20 @@ export default class SearchRecipe extends Component{
             scrollEnabled: true,
             isViewDetail: true,
             recipeItem: null,
+            sorting: {
+                isCode: true,
+                isAsc: true,
+            }
         }
         this.handleSearchText = this.handleSearchText.bind(this);
         this.handleScrollEnable = this.handleScrollEnable.bind(this);
         this.handleRecipeItem = this.handleRecipeItem.bind(this);
+        this.handleSortResults = this.handleSortResults.bind(this);
         this.position = new Animated.ValueXY(0,0)
+    }
+    
+    componentDidMount(){
+        this.handleSortResults()
     }
 
     moveToItemScreen = () => {
@@ -158,8 +167,28 @@ export default class SearchRecipe extends Component{
         Keyboard.dismiss();
     }
 
+    handleSortResults = (sortType) => {
+        const {sorting} = this.state
+        if (sortType==='codeName'){
+            sorting.isCode = !sorting.isCode;
+        } else if (sortType==='AscDesc'){
+            sorting.isAsc = !sorting.isAsc
+        }
+        const {searchResults} = this.props
+
+        const sortField = sorting.isCode ? 0 : 1;
+        
+        searchResults.sort((a,b)=>{
+            const a1 = a.key.split(' - ')[sortField]
+            const b1 = b.key.split(' - ')[sortField]
+            return (a1 - b1 >= 0)
+        })
+        this.setState({sortField: {...sorting}})
+        this.props.handleSearchResults(searchResults);
+    }
+
     render(){
-        const { searchText, scrollEnabled, recipeItem, isViewDetail } = this.state
+        const { searchText, scrollEnabled, recipeItem, isViewDetail, sorting } = this.state
         const { searchResults, handleSearchResults } = this.props
         return(
             <Animated.View style={[this.position.getLayout()]}>
@@ -170,13 +199,16 @@ export default class SearchRecipe extends Component{
                                 style={styles.searchText}
                                 value={searchText}
                                 placeholder='Code or name of recipe ...'
-                                onChangeText={this.handleSearchText}/>
+                                onChangeText={this.handleSearchText}
+                                clearButtonMode='while-editing'/>
                             <TouchableOpacity style={styles.btnSearch} onPress={this.handleSearchResult}>
                                 <MaterialIcons name='search' color='gray' size={45}/>
                             </TouchableOpacity>
                         </View>
                         <View style={styles.searchResults}> 
-                            {searchResults.length>0 && <SearchResultBar handleSearchResults={handleSearchResults}/>}
+                            {searchResults.length>0 && <SearchResultBar 
+                                handleSearchResults={handleSearchResults} sorting={sorting}
+                                handleSortResults={this.handleSortResults}/>}
                             <ScrollView scrollEnabled={scrollEnabled}>
                                 {searchResults.map((recipe, index)=>{
                                     return(

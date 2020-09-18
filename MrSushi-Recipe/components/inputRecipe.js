@@ -163,11 +163,11 @@ const styles=StyleSheet.create({
         height: '100%',
         width: '100%',
         flexDirection: 'row',
-        margin: 5,
     },
     inputView:{
         width: '100%',
         height: '100%',
+        padding: 5,
     },
     cameraView:{
         width: "100%",
@@ -184,6 +184,7 @@ const styles=StyleSheet.create({
         padding: 5,
         width: '18%', 
         marginRight: 8, 
+        height: 45,
         textAlign: 'center'
     },
     inputTextName:{
@@ -201,7 +202,8 @@ const styles=StyleSheet.create({
         fontSize: 15,
         width: '80%',
         height: 35,
-        padding: 5
+        padding: 5,
+        height: 45,
     },
     btnAdd:{
         borderRadius: 10,
@@ -219,7 +221,8 @@ const styles=StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderColor: 'red',
-        backgroundColor: '#e6e6fa'
+        backgroundColor: '#e6e6fa',
+        marginTop: 10,
     },
     btnDoneText:{
         fontSize: 20,

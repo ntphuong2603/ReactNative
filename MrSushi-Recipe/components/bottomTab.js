@@ -35,7 +35,7 @@ const styles=StyleSheet.create({
         margin: 5,
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 40,
+        height: 50,
     },
     tabItem:{
         borderRadius: 14,
