@@ -4,15 +4,14 @@ import { MaterialIcons } from 'react-native-vector-icons'
 import RecipeItem from './recipeItem'
 import DetailRecipe from './detailRecipe'
 import EditRecipe from './editRecipe'
+import { delete_recipe } from './recipe_io'
+import SearchResultBar from './searchResultBar'
 
 export default class SearchRecipe extends Component{
     constructor(props){
         super(props)
         this.state = {
             searchText: '',
-            recipeList: [],
-            //searchResults: this.props.searchResults,
-            //handleSearchResults: this.props.handleSearchResults, 
             scrollEnabled: true,
             isViewDetail: true,
             recipeItem: null,
@@ -60,9 +59,9 @@ export default class SearchRecipe extends Component{
         const { searchResults }= this.props
         if (action==='delete'){
             const key = searchResults[index].key
-            if (this.deleteRecipe(key)){
+            //if (this.deleteRecipe(key)){
+            if (delete_recipe(key)){
                 searchResults.splice(index, 1)
-                //this.setState({searchResults: searchResults})
                 this.props.handleSearchResults(searchResults)
                 alert('Recipe is deleted successfully!')
             }
@@ -92,6 +91,18 @@ export default class SearchRecipe extends Component{
     }
 
     handleUpdateRecipe = async (key, newRecipe) => {
+        await AsyncStorage.mergeItem(key, JSON.stringify(newRecipe), (error)=>{
+            if (error){
+                console.log('MERGE item error:', error);
+                return false
+            }
+        }).then(()=>{
+            const newList = this.props.searchResults.filter(result=>result.key !== key)
+            newList.push({key: key, ...newRecipe})
+            this.props.handleSearchResults(newList)
+            return true
+        })
+        /*
         await AsyncStorage.removeItem(key, (error)=>{
             if (error){
                 console.log('Remove item error: ', error);
@@ -108,6 +119,7 @@ export default class SearchRecipe extends Component{
             this.props.handleSearchResults(newList)
             return true
         })
+        */
     }
 
     handleSearchResult = async ()=>{
@@ -119,7 +131,6 @@ export default class SearchRecipe extends Component{
                 recipeSearchList.push(value.key)
             })
         }
-        //console.log('1-: ', recipeSearchList);
         if (searchText.length > 0){
             const searchList = []
             searchText.trim().toLowerCase().split(' ').forEach(text=>{
@@ -165,10 +176,7 @@ export default class SearchRecipe extends Component{
                             </TouchableOpacity>
                         </View>
                         <View style={styles.searchResults}> 
-                            {searchResults.length>0 && 
-                                <TouchableOpacity style={styles.btnClear} onPress={()=>handleSearchResults([])}>
-                                    <Text style={{color: 'white', fontWeight: 'bold'}}> Clear search history</Text>
-                                </TouchableOpacity>}
+                            {searchResults.length>0 && <SearchResultBar handleSearchResults={handleSearchResults}/>}
                             <ScrollView scrollEnabled={scrollEnabled}>
                                 {searchResults.map((recipe, index)=>{
                                     return(
@@ -235,14 +243,5 @@ const styles=StyleSheet.create({
         fontSize: 20,
         width: '86%',
         marginLeft: 5,
-    },
-    btnClear:{
-        borderRadius: 10,
-        backgroundColor: '#00bfff',
-        marginTop: 5,
-        marginBottom: 5,
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 10,
     },
 })

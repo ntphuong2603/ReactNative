@@ -26,21 +26,27 @@ export const write_recipe = async(key, value) => {
         await AsyncStorage.setItem(key, JSON.stringify(value));
         return true
     } catch (error) {
-        console.log('Write Reciper Error: ',error);
+        console.log('WRITE Recipe Error: ',error);
         return false
     }
 }
 
 export const delete_recipe = async(key) => {
-    await AsyncStorage.removeItem(key, error=>{
-        if (error){
-            console.log(error);
-            return false;
-        }
-        else {
-            return true;
-        }
-    })
+    try {
+        await AsyncStorage.removeItem(key, error=>{
+            if (error){
+                console.log('DELETE Recipe Error: ',error);
+                return false;
+            }
+            else {
+                return true;
+            }
+        })
+    } catch (error) {
+        console.log('DELETE Recipe Error: ',error);
+        return false
+    }
+    
 }
 
 export const update_recipe = async(key, value) => {

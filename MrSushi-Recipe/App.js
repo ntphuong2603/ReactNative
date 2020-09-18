@@ -45,6 +45,12 @@ export default class App extends Component {
     this.setState({orderList: orderList});
   }
 
+  handleUpdateRecipeList = (newRecipe) => {
+    const {recipeList} = this.state
+    recipeList.push(newRecipe)
+    this.setState({recipeList: recipeList})
+  }
+
   render(){
     const {selectedTab, recipeList, searchResults, orderList} = this.state;
     return (
@@ -52,7 +58,7 @@ export default class App extends Component {
         <View style={styles.mainContainer}>
           {selectedTab===0 && <OrderRecipe recipeList={recipeList} handleOrderList={this.handleOrderList} orderList={orderList}/>}
           {selectedTab===1 && <SearchRecipe recipeList={recipeList} searchResults={searchResults} handleSearchResults={this.handleSearchResults}/>}
-          {selectedTab===2 && <InputRecipe />}
+          {selectedTab===2 && <InputRecipe handleUpdateRecipeList={this.handleUpdateRecipeList}/>}
         </View>
         <BottomTab selectedTab={selectedTab} tabList={TAB_LIST} handleSelectTab={this.handleSelectTab}/>
       </View>

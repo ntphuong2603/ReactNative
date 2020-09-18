@@ -48,7 +48,6 @@ export default class InputRecipe extends Component{
         this.setState({showImageGallary: !showImageGallary})
     }
 
-
     moveScreen = () => {
         Animated.spring(this.position, {
             toValue: {x: -SCREEN_WIDTH, y:0},
@@ -86,6 +85,7 @@ export default class InputRecipe extends Component{
         }
         if (write_recipe(key, value)){
             this.resetAllStates();
+            this.props.handleUpdateRecipeList(key)
             Alert.alert('ADD recipe','New recipe is added into AsyncStore successfully',[
                 {
                     text: 'OK',
@@ -163,6 +163,7 @@ const styles=StyleSheet.create({
         height: '100%',
         width: '100%',
         flexDirection: 'row',
+        margin: 5,
     },
     inputView:{
         width: '100%',
