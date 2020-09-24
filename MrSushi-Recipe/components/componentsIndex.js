@@ -1,13 +1,17 @@
-const { default: SearchRecipe } = require("./searchRecipe");
-const { default: EditRecipe } = require("./editRecipe");
-const { default: InputRecipe } = require("./inputRecipe");
-const { default: BottomTab } = require("./bottomTab");
-const { default: OrderRecipe } = require("./orderRecipe");
+import BottomTab from "./bottomTab";
+import OrderTab from "./orderTab";
+import RecipePicture from './recipePicture';
+import RecipeCamera from "./recipeCamera";
+import RecipePhoto from "./recipePhoto";
+import SearchResultBar from "./searchResultBar";
+import RecipeItem from './recipeItem';
 
 module.exports = {
-    SearchRecipe: SearchRecipe,
-    EditRecipe: EditRecipe,
-    InputRecipe: InputRecipe,
-    OrderRecipe: OrderRecipe,
-    BottomTab: BottomTab,
+    BottomTab,
+    OrderTab,
+    RecipeItem,
+    SearchResultBar,
+    RecipePicture, 
+    RecipePhoto,
+    RecipeCamera,
 }

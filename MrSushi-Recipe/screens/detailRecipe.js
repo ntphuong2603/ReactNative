@@ -41,7 +41,6 @@ export default class DetailRecipe extends Component{
         )
     }
 }
-const fontSizeBase = 12;
 
 const styles=StyleSheet.create({
     containter:{

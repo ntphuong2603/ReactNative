@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { AsyncStorage, Image, Keyboard, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { AsyncStorage, Image, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import OrderTab from './orderTab'
+import {OrderTab} from '../components/componentsIndex'
 
 export default class OrderRecipe extends Component{
     constructor(props){

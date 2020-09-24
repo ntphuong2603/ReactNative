@@ -1,30 +1,24 @@
-import React, { Component } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
+import React from 'react';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { FONT_SIZE_BASE, SCREEN_WIDTH, TAB_LIST } from './constants';
 
-export default class BottomTab extends Component{
-    constructor(props){
-        super(props)
-    }
-
-    render(){
-        const {selectedTab, tabList, handleSelectTab} = this.props
-        return(
-            <View style={styles.container}>
-                {Object.keys(tabList).map((eachKey, index)=>{
-                    const tabName = tabList[eachKey];
-                    return(
-                        <TouchableOpacity key={eachKey} onPress={handleSelectTab.bind(this, index)}
-                            style={[styles.tabItem, (selectedTab===index? {backgroundColor:'red'}:null)]}>
-                            <Text style={[styles.tabText,(selectedTab===index? {color:'white', fontWeight:'bold'}:null)]}>{tabName[0].toUpperCase()+tabName.substr(1,).toLowerCase()}</Text>
-                        </TouchableOpacity>
-                        )
-                })}
-            </View>
-        )
-    }
+export default BottomTab = (props)=> {
+    const {selectedTab, handleSelectTab} = props
+    return(
+        <View style={styles.container}>
+            {Object.keys(TAB_LIST).map((eachKey, index)=>{
+                const tabName = TAB_LIST[eachKey];
+                return(
+                    <TouchableOpacity key={eachKey} onPress={handleSelectTab.bind(this, index)}
+                        style={selectedTab===index? styles.tabItemSelected : styles.tabItem}>
+                        <Text style={selectedTab===index? styles.tabTextSelected : styles.tabText}>{tabName[0].toUpperCase()+tabName.substr(1,).toLowerCase()}</Text>
+                    </TouchableOpacity>
+                )
+            })}
+        </View>
+    )
 }
 
-const SCREEN_WIDTH = Dimensions.get('screen').width;
 
 const styles=StyleSheet.create({
     container:{
@@ -40,12 +34,26 @@ const styles=StyleSheet.create({
     tabItem:{
         borderRadius: 14,
         height: '95%',
-        width: Math.floor(SCREEN_WIDTH/3.3),
+        width: Math.floor(SCREEN_WIDTH/(TAB_LIST.length+1)),
         justifyContent: 'center',
         alignItems: 'center',
         margin: 1,
     },
+    tabItemSelected: {
+        borderRadius: 14,
+        height: '95%',
+        width: Math.floor(SCREEN_WIDTH/(TAB_LIST.length+1)),
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 1,
+        backgroundColor:'red',
+    },
     tabText:{
-        fontSize: 15,
+        fontSize: FONT_SIZE_BASE,
+    },
+    tabTextSelected: {
+        fontSize: FONT_SIZE_BASE,
+        color:'white', 
+        fontWeight:'bold',
     }
 })

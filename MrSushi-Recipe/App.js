@@ -1,36 +1,31 @@
-import 'react-native-gesture-handler';
 import React, { Component } from 'react';
 import { AsyncStorage, StyleSheet, View } from 'react-native';
-import { SearchRecipe, InputRecipe, BottomTab} from './components/componentsIndex';
-import { Camera } from 'expo-camera';
-import OrderRecipe from './components/orderRecipe';
-
-const TAB_LIST = ['order', 'search', 'input']
+import { BottomTab} from './components/componentsIndex';
+import { OrderRecipe, SearchRecipe, InputRecipe } from './screens/indexMainScreen';
 
 export default class App extends Component {
-  constructor(props){
-    super(props)
+  constructor(){
+    super();
     this.state={
-      selectedTab:0,
+      selectedTab:2,
       searchResults: [],
       orderList: [],
-      recipeList: []
+      recipeList: [],
+      recipe: {
+        code: '',
+        name: '',
+        list: [],
+        pict: {
+          dine_in: '',
+          take_out: '',
+        }
+      }
     }
-    this.handleSelectTab = this.handleSelectTab.bind(this);
   }
 
   async componentDidMount(){
-    await AsyncStorage.getAllKeys().then(results=>{
-      console.log(results);
-      this.setState({recipeList: results})
-    })
-    
-    const permissions = Camera.requestPermissionsAsync();
-    if (permissions.status === 'granted'){
-      console.log('Camear access granted');
-    } else {
-      console.log('Camear access denied');
-    }
+    await AsyncStorage.getAllKeys()
+      .then(results=>{this.setState({recipeList: results})})
   }
 
   handleSelectTab = (selectedTab) => {
@@ -49,18 +44,51 @@ export default class App extends Component {
     const {recipeList} = this.state
     recipeList.push(newRecipe)
     this.setState({recipeList: recipeList})
+    //this.state.recipeList.push(newRecipe)
+    //this.forceUpdate();
+  }
+
+  handleRecipe = (text, fieldName, subFieldName=null) => {
+    const {recipe} = this.state
+    switch (fieldName){
+      case 'code':
+        recipe.code = text;
+        break;
+      case 'name':
+        recipe.name = text;
+        break;
+      case 'list':
+        recipe.list.push(text);
+        break;
+      case 'pict':
+        if (subFieldName==='IN'){
+          recipe.pict.dine_in = text;
+        } else {
+          recipe.pict.take_out = text;
+        }
+        break;
+    }
+    this.setState({recipe: recipe})
+}
+
+  showScreen(tab){
+    const {recipeList, searchResults, orderList, recipe} = this.state;
+    const screenList = [
+      <OrderRecipe recipeList={recipeList} handleOrderList={this.handleOrderList} orderList={orderList} />,
+      <SearchRecipe recipeList={recipeList} searchResults={searchResults} handleSearchResults={this.handleSearchResults} />,
+      <InputRecipe recipe={recipe} handleUpdateRecipeList={this.handleUpdateRecipeList} handleRecipe={this.handleRecipe} />
+    ]
+    return screenList[tab];
   }
 
   render(){
-    const {selectedTab, recipeList, searchResults, orderList} = this.state;
+    const {selectedTab} = this.state;
     return (
       <View style={styles.container}>
         <View style={styles.mainContainer}>
-          {selectedTab===0 && <OrderRecipe recipeList={recipeList} handleOrderList={this.handleOrderList} orderList={orderList}/>}
-          {selectedTab===1 && <SearchRecipe recipeList={recipeList} searchResults={searchResults} handleSearchResults={this.handleSearchResults}/>}
-          {selectedTab===2 && <InputRecipe handleUpdateRecipeList={this.handleUpdateRecipeList}/>}
+          {this.showScreen(selectedTab)}
         </View>
-        <BottomTab selectedTab={selectedTab} tabList={TAB_LIST} handleSelectTab={this.handleSelectTab}/>
+        <BottomTab selectedTab={selectedTab} handleSelectTab={this.handleSelectTab}/>
       </View>
     )
   }

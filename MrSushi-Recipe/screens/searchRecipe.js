@@ -1,11 +1,8 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, AsyncStorage, TextInput,  TouchableOpacity, ScrollView, Keyboard, Animated, Dimensions, Alert} from 'react-native'
+import { View, StyleSheet, AsyncStorage, TextInput,  TouchableOpacity, ScrollView, Keyboard, Animated } from 'react-native'
 import { MaterialIcons } from 'react-native-vector-icons'
-import RecipeItem from './recipeItem'
-import DetailRecipe from './detailRecipe'
-import EditRecipe from './editRecipe'
-import { delete_recipe } from './recipe_io'
-import SearchResultBar from './searchResultBar'
+import { SCREEN_WIDTH } from '../components/constants'
+import { DetailRecipe, EditRecipe, SearchResultBar, RecipeItem } from './indexSubScreens';
 
 export default class SearchRecipe extends Component{
     constructor(props){
@@ -187,9 +184,35 @@ export default class SearchRecipe extends Component{
         this.props.handleSearchResults(searchResults);
     }
 
+    showRecipe = (isViewDetail) => {
+        const { recipeItem } = this.state
+        if (isViewDetail){
+            return <DetailRecipe recipe={recipeItem} backToSearch={this.backToSearchScreen}/>
+        } else {
+            return <EditRecipe recipe={recipeItem} 
+                        backToSearch={this.backToSearchScreen} 
+                        moveToCameraScreen={this.moveToCameraScreen}
+                        moveToItemScreen={this.moveToItemScreen}
+                        handleUpdateRecipe={this.handleUpdateRecipe}
+                        handleUpdateResultList={this.handleUpdateResultList}/>
+        }
+    }
+
+    showResults = (results) => {
+        const { sorting } = this.state
+        const { handleSearchResults } = this.props
+        if (results.length > 0){
+            return <SearchResultBar 
+                        handleSearchResults={handleSearchResults} sorting={sorting}
+                        handleSortResults={this.handleSortResults}/>
+        } else {
+            return null
+        }
+    }
+
     render(){
-        const { searchText, scrollEnabled, recipeItem, isViewDetail, sorting } = this.state
-        const { searchResults, handleSearchResults } = this.props
+        const { searchText, scrollEnabled, isViewDetail } = this.state
+        const { searchResults } = this.props
         return(
             <Animated.View style={[this.position.getLayout()]}>
                 <View style={styles.container}>
@@ -206,9 +229,7 @@ export default class SearchRecipe extends Component{
                             </TouchableOpacity>
                         </View>
                         <View style={styles.searchResults}> 
-                            {searchResults.length>0 && <SearchResultBar 
-                                handleSearchResults={handleSearchResults} sorting={sorting}
-                                handleSortResults={this.handleSortResults}/>}
+                            {this.showResults(searchResults)}
                             <ScrollView scrollEnabled={scrollEnabled}>
                                 {searchResults.map((recipe, index)=>{
                                     return(
@@ -220,23 +241,12 @@ export default class SearchRecipe extends Component{
                             </ScrollView>
                         </View>
                     </View>
-                    <View style={styles.itemView}>
-                        {isViewDetail && <DetailRecipe recipe={recipeItem} backToSearch={this.backToSearchScreen}/>}
-                        {!isViewDetail && <EditRecipe recipe={recipeItem} 
-                            backToSearch={this.backToSearchScreen} 
-                            moveToCameraScreen={this.moveToCameraScreen}
-                            moveToItemScreen={this.moveToItemScreen}
-                            handleUpdateRecipe={this.handleUpdateRecipe}
-                            handleUpdateResultList={this.handleUpdateResultList}/>}
-                    </View>
+                    <View style={styles.itemView}>{this.showRecipe(isViewDetail)}</View>
                 </View>
             </Animated.View>
         )
     }
 }
-
-const SCREEN_WIDTH = Dimensions.get('screen').width;
-//const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 const styles=StyleSheet.create({
     container:{

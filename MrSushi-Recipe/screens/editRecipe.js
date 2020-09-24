@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { View, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Animated, Dimensions, Easing, Alert } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import RecipePhoto from './recipePhoto';
-import RecipeCamera from './recipeCamera';
+import {RecipePhoto, RecipeCamera} from '../components/componentsIndex'
 
 export default class EditRecipe extends Component{
     constructor(props){
