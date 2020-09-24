@@ -3,6 +3,7 @@ import { View, StyleSheet, AsyncStorage, TextInput,  TouchableOpacity, ScrollVie
 import { MaterialIcons } from 'react-native-vector-icons'
 import { SCREEN_WIDTH } from '../components/constants'
 import { DetailRecipe, EditRecipe, SearchResultBar, RecipeItem } from './indexSubScreens';
+import { getRecipes } from '../components/recipe_io';
 
 export default class SearchRecipe extends Component{
     constructor(props){
@@ -24,10 +25,6 @@ export default class SearchRecipe extends Component{
         this.position = new Animated.ValueXY(0,0)
     }
     
-    componentDidMount(){
-        this.handleSortResults()
-    }
-
     moveToItemScreen = () => {
         Animated.spring(this.position, {
             toValue: {x: -SCREEN_WIDTH, y:0},
@@ -131,10 +128,10 @@ export default class SearchRecipe extends Component{
     handleSearchResult = async ()=>{
         const { searchText } = this.state
         const { searchResults, recipeList } = this.props
-        const recipeSearchList = []
+        const keyList = []
         if (searchResults.length > 0){
             searchResults.forEach(value=>{
-                recipeSearchList.push(value.key)
+                keyList.push(value.key)
             })
         }
         if (searchText.length > 0){
@@ -146,40 +143,35 @@ export default class SearchRecipe extends Component{
                     }
                 })
             })
-            const list_2 = searchList.filter(recipe=>!recipeSearchList.includes(recipe))
-            recipeSearchList.push(...list_2)
+            const list_2 = searchList.filter(recipe=>!keyList.includes(recipe))
+            keyList.push(...list_2)
         }
-        await AsyncStorage.multiGet(recipeSearchList, (error, results)=>{
-            if (error){
-                console.log(error);
-            } else {
-                const resutlList = []
-                results.forEach(result=>{
-                    resutlList.push({key: result[0], ...JSON.parse(result[1])})
-                })
-                this.props.handleSearchResults(resutlList)
-                this.setState({searchText: ''})
-            }
-        })
+        this.props.handleSearchResults(await getRecipes(keyList))
+        this.handleSortResults()
+        this.setState({searchText: ''})
         Keyboard.dismiss();
     }
 
     handleSortResults = (sortType) => {
         const {sorting} = this.state
-        if (sortType==='codeName'){
+        if (sortType==='CodeName'){
             sorting.isCode = !sorting.isCode;
         } else if (sortType==='AscDesc'){
             sorting.isAsc = !sorting.isAsc
         }
         const {searchResults} = this.props
-
-        const sortField = sorting.isCode ? 0 : 1;
         
         searchResults.sort((a,b)=>{
-            const a1 = a.key.split(' - ')[sortField]
-            const b1 = b.key.split(' - ')[sortField]
-            return (a1 - b1 >= 0)
+            if (sorting.isCode){
+                return parseInt(a.key.slice(1,)) - parseInt(b.key.slice(1,)) >= 0
+            } else {
+                return (a.name.trim().toLowerCase() - b.name.trim().toLowerCase()) >= 0
+            }
         })
+
+        if (!sorting.isAsc){
+            searchResults.reverse()
+        }
         this.setState({sortField: {...sorting}})
         this.props.handleSearchResults(searchResults);
     }
@@ -198,7 +190,7 @@ export default class SearchRecipe extends Component{
         }
     }
 
-    showResults = (results) => {
+    showSearchResultBar = (results) => {
         const { sorting } = this.state
         const { handleSearchResults } = this.props
         if (results.length > 0){
@@ -213,6 +205,7 @@ export default class SearchRecipe extends Component{
     render(){
         const { searchText, scrollEnabled, isViewDetail } = this.state
         const { searchResults } = this.props
+        console.log(searchResults);
         return(
             <Animated.View style={[this.position.getLayout()]}>
                 <View style={styles.container}>
@@ -229,7 +222,7 @@ export default class SearchRecipe extends Component{
                             </TouchableOpacity>
                         </View>
                         <View style={styles.searchResults}> 
-                            {this.showResults(searchResults)}
+                            {this.showSearchResultBar(searchResults)}
                             <ScrollView scrollEnabled={scrollEnabled}>
                                 {searchResults.map((recipe, index)=>{
                                     return(

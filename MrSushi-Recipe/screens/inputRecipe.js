@@ -5,7 +5,7 @@ import { RecipePicture } from '../components/componentsIndex';
 export default InputRecipe = (props) => {
 
     const [ingredeint, setIngredeint] = useState('');
-    const { recipe, handleRecipe } = props;
+    const { recipe, handleRecipe, handleUpdateRecipeList } = props;
 
     return(
         <View style={styles.inputView}>
@@ -33,7 +33,7 @@ export default InputRecipe = (props) => {
                     <Text style={{fontWeight:'bold', color:'red'}}>Add</Text>
                 </TouchableOpacity>
             </View>
-            <ScrollView style={{height:'78%'}}>
+            <ScrollView style={{height:'80%'}}>
                 {recipe.list.map((value,index)=>{
                     return(
                         <View key={index}>
@@ -42,8 +42,8 @@ export default InputRecipe = (props) => {
                     )
                 })}
                 <Text style={{marginTop: 10, fontSize: 15, fontWeight: 'bold'}}>Illustration</Text>
-                <RecipePicture pictUrl={recipe.pict} handleRecipe={handleRecipe}/>
-                {recipe.code.length>0 && <TouchableOpacity style={styles.btnDone} onPress={handleRecipe}>
+                <RecipePicture pictUrl={recipe.pict} handleRecipe={handleRecipe} btnView={true}/>
+                {recipe.code.length>0 && <TouchableOpacity style={styles.btnDone} onPress={handleUpdateRecipeList}>
                     <Text style={styles.btnDoneText}>F  I  N  I  S  H</Text>
                 </TouchableOpacity>}
             </ScrollView>
@@ -52,11 +52,6 @@ export default InputRecipe = (props) => {
 }
 
 const styles=StyleSheet.create({
-    container:{
-        height: '100%',
-        width: '100%',
-        flexDirection: 'row',
-    },
     inputView:{
         width: '100%',
         height: '100%',

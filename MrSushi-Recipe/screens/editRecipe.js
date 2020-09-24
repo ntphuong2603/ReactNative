@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, StyleSheet, TextInput, Text, TouchableOpacity, ScrollView, Animated, Dimensions, Easing, Alert } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import {RecipePhoto, RecipeCamera} from '../components/componentsIndex'
+import {RecipePicture} from '../components/componentsIndex'
 
 export default class EditRecipe extends Component{
     constructor(props){
@@ -22,10 +22,10 @@ export default class EditRecipe extends Component{
     getNewRecipe(recipe){
         const recipeStr = JSON.stringify(recipe)
         const recipeJson = JSON.parse(recipeStr);
-        const key = recipeJson.key
-        recipeJson.code = key.split(' - ')[0].trim();
-        recipeJson.name = key.split(' - ')[1].trim();
-        //console.log(recipeJson);
+        //const key = recipeJson.key
+        //recipeJson.code = key.split(' - ')[0].trim();
+        //recipeJson.name = key.split(' - ')[1].trim();
+        console.log(recipeJson);
         return recipeJson
     }
 
@@ -61,7 +61,7 @@ export default class EditRecipe extends Component{
                 style: 'destructive',
                 onPress: ()=>{
                     const {recipe} = this.state
-                    const key = recipe.code.trim() + ' - ' + recipe.name.trim()
+                    const key = recipe.key.trim() + ' - ' + recipe.name.trim()
                     const newRecipe = {
                         imgPath: recipe.imgPath,
                         ingredient: recipe.ingredient.filter(ingre=>ingre.trim().length > 0),
@@ -111,7 +111,7 @@ export default class EditRecipe extends Component{
                         <View style={styles.viewRecipe}>
                             <View style={[styles.viewCol, {width: '20%'}]}>
                                 <Text style={styles.textCol}>Code</Text>
-                                <TextInput style={[styles.styleInputText, {textAlign: 'center'}]}>{recipe.code}</TextInput>
+                                <TextInput style={[styles.styleInputText, {textAlign: 'center'}]}>{recipe.key}</TextInput>
                             </View>
                             <View style={[styles.viewCol, { width: '79%'}]}>
                                 <Text style={styles.textCol}>Name</Text>
@@ -124,7 +124,7 @@ export default class EditRecipe extends Component{
                                 <Text style={{fontSize: 10, fontWeight: 'bold'}}> Touch to add more ingredient ... </Text>
                             </TouchableOpacity>
                         </View>
-                        {recipe.ingredient.map((each,index)=>{
+                        {recipe.list.map((each,index)=>{
                             return(
                                 <View key={index} style={styles.ingredientItem}>
                                     <View style={[styles.styleInputText, {width: '87%', flexDirection: 'row', alignItems: 'center', justifyContent:'flex-start'}]}>
@@ -140,14 +140,11 @@ export default class EditRecipe extends Component{
                                 </View>
                             )
                         })}
-                        <RecipePhoto imgUrl={recipe.imgPath} setImgUrl={(uri)=>{this.handleEditRecipe('image',uri)}} moveScreen={moveToCameraScreen}/>
+                        <RecipePicture pictUrl={recipe.pict} handleRecipe={this.handleEditRecipe} btnView={true}/>
                         <TouchableOpacity style={styles.btnDone} onPress={()=>this.handleUpdateRecipe()}>
                             <Text style={styles.btnDoneText}>U p d a t e</Text>
                         </TouchableOpacity>
                     </ScrollView>
-                </View>
-                <View style={styles.cameraView}>
-                    <RecipeCamera setImgUrl={(uri)=>{this.handleEditRecipe('image', uri)}} resetScreen={moveToItemScreen}/>
                 </View>
             </View>
         )

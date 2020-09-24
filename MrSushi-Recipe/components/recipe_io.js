@@ -1,30 +1,29 @@
 import { AsyncStorage } from 'react-native'
 
-export const getRecipes = async(codes) => {
-    const results = await AsyncStorage.multiGet(codes,(error, results)=>{
+export const getRecipes = async(keyList) => {
+    const results = await AsyncStorage.multiGet(keyList, (error, results)=>{
         if (error){
-            return null
+            console.log(error);
         } else {
-            
+            return results;
         }
     })
-    const list = []
+    const resultList = []
     results.forEach(result=>{
-        const value = JSON.parse(result[1])
-        const recipe = {
-            code: result[0],
-            ...value,
-        }
-        list.push(recipe)
+        resultList.push({key: result[0], ...JSON.parse(result[1])})
     })
-    console.log('Get Recipe list: ', list);
-    return list;
+    return resultList;
 }
 
 export const write_recipe = async(key, value) => {
     try {
-        await AsyncStorage.setItem(key, JSON.stringify(value));
-        return true
+        await AsyncStorage.setItem(key, JSON.stringify(value),(error)=>{
+            if (error){
+                console.log('Write Recipe Error:', error);
+            } else {
+                return true;
+            }
+        })
     } catch (error) {
         console.log('WRITE Recipe Error: ',error);
         return false

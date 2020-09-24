@@ -14,7 +14,7 @@ export default class SearchResultBar extends Component{
                 <TouchableOpacity style={styles.btnClear} onPress={()=>handleSearchResults([])}>
                     <Text style={styles.btnText}>Clear</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.btnName} onPress={handleSortResults.bind(this, 'codeName')}>
+                <TouchableOpacity style={styles.btnName} onPress={handleSortResults.bind(this, 'CodeName')}>
                     <Text style={styles.btnText}>By {sorting.isCode? 'Code' : 'Name'}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.btnSort} onPress={handleSortResults.bind(this, 'AscDesc')}>

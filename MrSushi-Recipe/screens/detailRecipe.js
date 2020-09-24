@@ -1,45 +1,36 @@
-import React, { Component } from 'react';
-import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import React from 'react';
+import { View, StyleSheet, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { RecipePicture } from '../components/componentsIndex';
 
-export default class DetailRecipe extends Component{
-    constructor(props){
-        super(props);
-    }
-    render(){
-        const {recipe, backToSearch} = this.props
-        return(
-            <View style={styles.containter}>
-                {recipe !== null && <View>
-                    <View style={styles.headerTitle}>
-                        <TouchableOpacity onPress={backToSearch}>
-                            <MaterialIcons name='keyboard-arrow-left' size={45} color='#191970'/>
-                        </TouchableOpacity>
-                        <View style={styles.headerStyle}>
-                            <Text style={styles.txtRecipe}>Ingredient</Text>
-                            <Text style={{fontSize: 18,color:'#6a5acd'}}>{recipe.key}</Text>
-                        </View>
-                    </View>
-                    <ScrollView style={styles.ingredientView}>
-                        {recipe.ingredient.map((each,index)=>{
-                            return(
-                                <View key={index} style={styles.recipeIngredient}>
-                                    <Text style={{textAlign:'center', fontSize: 15, fontWeight: 'bold'}}>{index+1})</Text>
-                                    <Text style={{fontSize: 15}}> {each} </Text>
-                                </View>
-                            )
-                        })}
-                    <Image style={styles.recipeImage} 
-                        source={recipe.imgPath.length===0?require('../assets/MrSushi_Food_Image.jpg'):{uri:recipe.imgPath}}/>
-                    <TouchableOpacity style={styles.btnGoBack} onPress={backToSearch}>
-                        <Text>Back to search</Text>
+export default DetailRecipe = (props) => {
+    const {recipe, backToSearch} = props
+    return(
+        <View style={styles.containter}>
+            {recipe !== null && <View>
+                <View style={styles.headerTitle}>
+                    <TouchableOpacity onPress={backToSearch}>
+                        <MaterialIcons name='keyboard-arrow-left' size={45} color='#191970'/>
                     </TouchableOpacity>
-                    </ScrollView>
-                </View>}
-            </View>
-        )
-    }
+                    <View style={styles.headerStyle}>
+                        <Text style={styles.txtRecipe}>Ingredient</Text>
+                        <Text style={{fontSize: 18,color:'#6a5acd'}}>{recipe.key} - {recipe.name}</Text>
+                    </View>
+                </View>
+                <ScrollView style={styles.ingredientView}>
+                    {recipe.list.map((each,index)=>{
+                        return(
+                            <View key={index} style={styles.recipeIngredient}>
+                                <Text style={{textAlign:'center', fontSize: 15, fontWeight: 'bold'}}>{index+1})</Text>
+                                <Text style={{fontSize: 15}}> {each} </Text>
+                            </View>
+                        )
+                    })}
+                    <RecipePicture pictUrl={recipe.pict} btnView={false}/>
+                </ScrollView>
+            </View>}
+        </View>
+    )
 }
 
 const styles=StyleSheet.create({

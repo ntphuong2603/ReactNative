@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { AsyncStorage, StyleSheet, View } from 'react-native';
+import { AsyncStorage, StyleSheet, View, Alert } from 'react-native';
 import { BottomTab} from './components/componentsIndex';
 import { OrderRecipe, SearchRecipe, InputRecipe } from './screens/indexMainScreen';
+import { write_recipe } from './components/recipe_io';
 
 export default class App extends Component {
   constructor(){
@@ -25,7 +26,10 @@ export default class App extends Component {
 
   async componentDidMount(){
     await AsyncStorage.getAllKeys()
-      .then(results=>{this.setState({recipeList: results})})
+      .then(results=>{
+        console.log('Keylist: ',results);
+        this.setState({recipeList: results})
+      })
   }
 
   handleSelectTab = (selectedTab) => {
@@ -40,33 +44,53 @@ export default class App extends Component {
     this.setState({orderList: orderList});
   }
 
-  handleUpdateRecipeList = (newRecipe) => {
-    const {recipeList} = this.state
-    recipeList.push(newRecipe)
-    this.setState({recipeList: recipeList})
-    //this.state.recipeList.push(newRecipe)
-    //this.forceUpdate();
+  handleUpdateRecipeList = () => {
+    const {recipeList, recipe, searchResults} = this.state
+    const key = recipe.code.trim()
+    delete recipe.code
+    const value = {...recipe}
+    console.log(key,value);
+    if (write_recipe(key, value)){
+      const obj = {}
+      obj[key] = value;
+      recipeList.push(key)
+      searchResults.push(obj)
+      this.setState({ recipeList: recipeList, 
+                      recipe: {...this.resetRecipe()}, 
+                      searchResults: searchResults})
+      Alert.alert('Create','New recipe is created successfully',[
+        {
+          text: 'OK',
+          style: 'default'
+        }
+      ])
+    }
   }
 
-  handleRecipe = (text, fieldName, subFieldName=null) => {
+  resetRecipe(){
+    return {
+      code: '',
+      name: '',
+      list: [],
+      pict: {
+        dine_in: '',
+        take_out: '',
+      }
+    }
+  }
+
+  handleRecipe = (fieldValue, fieldName, subFieldName=null) => {
     const {recipe} = this.state
-    switch (fieldName){
-      case 'code':
-        recipe.code = text;
-        break;
-      case 'name':
-        recipe.name = text;
-        break;
-      case 'list':
-        recipe.list.push(text);
-        break;
-      case 'pict':
-        if (subFieldName==='IN'){
-          recipe.pict.dine_in = text;
-        } else {
-          recipe.pict.take_out = text;
-        }
-        break;
+    if (fieldName==='pict'){
+      if (subFieldName==='IN'){
+        recipe.pict.dine_in = fieldValue;
+      } else {
+        recipe.pict.take_out = fieldValue;
+      }
+    } else if (fieldName==='list'){
+      recipe.list.push(fieldValue)
+    } else {
+      recipe[fieldName] = fieldValue
     }
     this.setState({recipe: recipe})
 }
