@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity, Image, StyleSheet, Animated, PanResponder, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, Image, StyleSheet, Animated, PanResponder, Alert, ScrollView } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
 export default class RecipeItem extends Component{
     constructor(props){
         super(props)
+        this.state = {index:0, scrollView: null}
         const position = new Animated.ValueXY(0,0);
         const panResponder = PanResponder.create({
             onStartShouldSetPanResponder: () => false,
@@ -40,9 +41,34 @@ export default class RecipeItem extends Component{
         })
         this.position = position;
         this.panResponder = panResponder;
+        this.picCarousel = null;
         this.handleDeleteRecipe = this.handleDeleteRecipe.bind(this);
     }
 
+    componentDidMount(){
+        setInterval(()=>{this.autoScroll()}, 2500)
+    }
+
+    componentWillUnmount(){
+        clearInterval(this.picCarousel);
+    }
+
+    setScrollView = (element) => {
+        this.setState({scrollView:  element})
+    }
+
+    autoScroll = () => {
+        const {index, scrollView} = this.state;
+        if (index==1){
+            scrollView.scrollTo({x:0, y:0, animated: true})
+            this.setState({index: 0})
+        } else {
+            scrollView.scrollToEnd()
+            this.setState({index: 1})
+        }
+        
+    }
+    
     swiptToLeft(gesture){
         if (gesture.dx <= -70){
             const x = -(70*2+15)
@@ -112,8 +138,15 @@ export default class RecipeItem extends Component{
                         <Text style={{fontSize: 18}}>Name: {recipe.name.trim()}</Text>
                     </TouchableOpacity>
                     <Animated.View style={[styles.itemImage, this.position.getLayout()]} {...this.panResponder.panHandlers}>
-                        <Image style={styles.imgView} 
-                            source={recipe.pict.dine_in.length===0?require('../assets/MrSushi_Food_Image.jpg'):{uri:recipe.pict.dine_in}}/>
+                        <ScrollView
+                            horizontal={true}
+                            scrollEnabled={false}
+                            ref={this.setScrollView}>
+                            <Image style={styles.imgView} 
+                                source={recipe.pict.dine_in.length==0?require('../assets/MrSushi_Food_Image.jpg'):{uri:recipe.pict.dine_in}}/>
+                            <Image style={styles.imgView} 
+                                source={recipe.pict.take_out.length==0?require('../assets/MrSushi_Food_Image.jpg'):{uri:recipe.pict.take_out}}/>
+                        </ScrollView>
                     </Animated.View>
                 </View>
                 <Animated.View style={this.getStylesBtnRight()}>
@@ -151,15 +184,15 @@ const styles=StyleSheet.create({
     },
     itemImage:{
         height: 100,
-        width: '35%',
-        borderRadius: 15,
-        borderColor: 'red',
-        borderWidth: 0.7,
+        width: 125,
+        flexDirection:'row',
     },
     imgView: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 15,
+        width: 125,
+        height: 100,
+        borderRadius: 10,
+        borderColor: 'red',
+        borderWidth: 0.7,
     },
     btnGroup:{
         position: 'relative',

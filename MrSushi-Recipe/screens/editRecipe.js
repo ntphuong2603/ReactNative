@@ -25,7 +25,7 @@ export default class EditRecipe extends Component{
         //const key = recipeJson.key
         //recipeJson.code = key.split(' - ')[0].trim();
         //recipeJson.name = key.split(' - ')[1].trim();
-        console.log(recipeJson);
+        //console.log(recipeJson);
         return recipeJson
     }
 

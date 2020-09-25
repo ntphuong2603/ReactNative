@@ -1,102 +1,77 @@
-import React, { Component } from 'react'
-import { AsyncStorage, Image, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useState } from 'react'
+import { Image, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import {OrderTab} from '../components/componentsIndex'
+import { OrderTab } from '../components/componentsIndex'
+import { VIEWER } from '../components/constants'
+import { getRecipes } from '../components/recipe_io'
 
-export default class OrderRecipe extends Component{
-    constructor(props){
-        super(props)
-        this.state={
-            orderSelected: 0,
-            orderListText : '',
-        }
-        this.handleOrderListText = this.handleOrderListText.bind(this);
-        this.handleOrderSelected = this.handleOrderSelected.bind(this);
-    }
+export default OrderRecipe = (props)=>{
 
-    handleOrderListText(text){
-        this.setState({orderListText: text})
-    }
+    const [orderSelected, setOrderSelected] = useState(0);
+    const [orderString, setOrderString] = useState('');
 
     handleSearchResults = async () => {
-        const {orderListText} = this.state
-        const {recipeList} = this.props
-        const orderList = orderListText.trim().toUpperCase().split('.')
-        const resultList = []
-        
-        if (orderListText.length > 0){
-            orderList.forEach(order=>{
-                recipeList.forEach(recipe=>{
-                    if (recipe.toUpperCase().search(order)>=0){
-                        resultList.push(recipe)
-                    }
-                })
-            })
-            await AsyncStorage.multiGet(resultList, (errors, results) => {
-                if (errors){
-                    console.log(errors);
-                } else {
-                    const ordersList = []
-                    results.forEach(result=>{
-                        ordersList.push({key: result[0], ...JSON.parse(result[1])})
+        if (orderString.trim().length>0){
+            const orderList = []
+            orderString.trim().toUpperCase().split('.')
+                .forEach(order=>{
+                    props.recipeList.forEach(recipe=>{
+                        if (recipe.toUpperCase().search(order)>=0){
+                            orderList.push(recipe)
+                        }
                     })
-                    this.props.handleOrderList(ordersList)
-                    this.setState({orderListText: '' })
-                }
             })
-            Keyboard.dismiss()
-        } else {
-            this.props.handleOrderList([])
+            props.handleOrderList(await getRecipes(orderList))
+            setOrderString('')
         }
-        Keyboard.dismiss();
+        Keyboard.dismiss()
     }
 
-    handleOrderSelected = (orderSelected) => {
-        this.setState({orderSelected:orderSelected})
-    }
-
-    render(){
-        const { orderListText, orderSelected } = this.state
-        const { orderList } = this.props
-        const orderItem = orderList[orderSelected]
-        return(
-            <View style={styles.container}>
-                <View style={styles.searchView}>
-                    <View style={styles.searchContainer}>
-                        <TextInput
-                            style={styles.searchText}
-                            value={orderListText}
-                            placeholder='Input a list of orders ...'
-                            onChangeText={this.handleOrderListText}
-                            keyboardType='numeric'
-                            clearButtonMode='always'
-                            />
-                        <TouchableOpacity style={styles.btnSearch} onPress={this.handleSearchResults}>
-                            <MaterialIcons name='search' color='gray' size={45}/>
-                        </TouchableOpacity>
+    const ViewItem = () => {
+        const orderItem = props.orderList[orderSelected]
+        if (!orderItem){
+            return null
+        } else {
+            return(
+                <View style={styles.orderView}>
+                    <Text style={styles.orderName}>{orderItem.key.trim()} - {orderItem.name.trim()}</Text>
+                    <View style={styles.orderIngredient}>
+                        {orderItem.list.map((value, index)=>{
+                            return(
+                                <Text key={index} style={styles.textIngredient}>{index+1}) {value}</Text>
+                            )
+                        })}
                     </View>
-                    <View style={styles.searchResults}>
-                        <OrderTab orderList={orderList} orderSelected={orderSelected} handleOrderSelected={this.handleOrderSelected}/>
-                        {orderItem && <View style={styles.orderView}>
-                            <Text style={styles.orderName}>{orderItem.key.split(' - ')[1].trim()}</Text>
-                            <View style={styles.orderIngredient}>
-                                {orderItem.ingredient.map((value, index)=>{
-                                    return(
-                                        <Text style={styles.textIngredient}>{index+1}) {value}</Text>
-                                    )
-                                })}
-                            </View>
-                            <Image style={styles.img}
-                                source={orderItem.imgPath.length===0 ? require('../assets/MrSushi_Food_Image.jpg') : {uri: orderItem.imgPath}}/>
-                        </View>}
-                    </View>
+                    <Image style={styles.img}
+                        source={orderItem.pict.dine_in.length===0 ? require('../assets/MrSushi_Food_Image.jpg') : {uri: orderItem.pict.dine_in}}/>
                 </View>
-                <View>
+            )
+        }
+    }
 
+    return(
+        <View style={styles.container}>
+            <View style={styles.searchView}>
+                <View style={styles.searchContainer}>
+                    <TextInput
+                        style={styles.searchText}
+                        value={orderString}
+                        placeholder='Input a list of orders ...'
+                        onChangeText={(text)=>setOrderString(text)}
+                        keyboardType='numeric'
+                        clearButtonMode='always'
+                        />
+                    <TouchableOpacity style={styles.btnSearch} onPress={handleSearchResults}>
+                        <MaterialIcons name='search' color='gray' size={45}/>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.searchResults}>
+                    <OrderTab orderList={props.orderList} orderSelected={orderSelected} setOrderSelected={setOrderSelected}/>
+                    <ViewItem/>
                 </View>
             </View>
-        )
-    }
+        </View>
+    )
 }
 
 const styles=StyleSheet.create({
@@ -140,6 +115,7 @@ const styles=StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         padding: 10,
+        
     },
     orderIngredient: {
         alignItems: 'flex-start',
@@ -149,7 +125,7 @@ const styles=StyleSheet.create({
         margin: 5,
     },
     img:{
-        width: '80%',
+        width: '100%',
         height: 300,
         resizeMode: 'contain',
         borderColor: 'red',

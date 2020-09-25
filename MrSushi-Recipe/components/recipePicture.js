@@ -25,8 +25,6 @@ export default RecipePicture = (props) => {
         },
         onPanResponderRelease: (event, gesture) => {
             position.flattenOffset();
-            const valueX = event.nativeEvent
-            console.log('Layout:', valueX);
             if (gesture.dx >= 0){
                 Animated.timing(position, {
                     toValue:{x:0, y:0},

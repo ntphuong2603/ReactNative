@@ -1,28 +1,22 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 
-export default class SearchResultBar extends Component{
-    constructor(props){
-        super(props)
-    }
-
-    render(){
-        const {sorting, handleSortResults,handleSearchResults} = this.props
-        return(
-            <View style={styles.container}>
-                <TouchableOpacity style={styles.btnClear} onPress={()=>handleSearchResults([])}>
-                    <Text style={styles.btnText}>Clear</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.btnName} onPress={handleSortResults.bind(this, 'CodeName')}>
-                    <Text style={styles.btnText}>By {sorting.isCode? 'Code' : 'Name'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.btnSort} onPress={handleSortResults.bind(this, 'AscDesc')}>
-                    <FontAwesome name={sorting.isAsc? 'sort-alpha-asc':'sort-alpha-desc'} size={25} color='white'/>
-                </TouchableOpacity>
-            </View>
-        )
-    }
+export default function SearchResultBar(props){
+    const {sorting, handleSortResults,handleSearchResults} = props
+    return(
+        <View style={styles.container}>
+            <TouchableOpacity style={styles.btnClear} onPress={()=>handleSearchResults([])}>
+                <Text style={styles.btnText}>Clear</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.btnName} onPress={handleSortResults.bind(this, 'CodeName')}>
+                <Text style={styles.btnText}>By {sorting.isCode? 'Code' : 'Name'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.btnSort} onPress={handleSortResults.bind(this, 'AscDesc')}>
+                <FontAwesome name={sorting.isAsc? 'sort-alpha-asc':'sort-alpha-desc'} size={25} color='white'/>
+            </TouchableOpacity>
+        </View>
+    )
 }
 
 const styles=StyleSheet.create({

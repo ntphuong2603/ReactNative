@@ -205,7 +205,6 @@ export default class SearchRecipe extends Component{
     render(){
         const { searchText, scrollEnabled, isViewDetail } = this.state
         const { searchResults } = this.props
-        console.log(searchResults);
         return(
             <Animated.View style={[this.position.getLayout()]}>
                 <View style={styles.container}>

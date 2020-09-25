@@ -8,7 +8,7 @@ export default class App extends Component {
   constructor(){
     super();
     this.state={
-      selectedTab:2,
+      selectedTab:0,
       searchResults: [],
       orderList: [],
       recipeList: [],
@@ -27,7 +27,7 @@ export default class App extends Component {
   async componentDidMount(){
     await AsyncStorage.getAllKeys()
       .then(results=>{
-        console.log('Keylist: ',results);
+        //console.log('Keylist: ',results);
         this.setState({recipeList: results})
       })
   }
