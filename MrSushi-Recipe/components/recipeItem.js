@@ -134,7 +134,7 @@ export default class RecipeItem extends Component{
             <View style={styles.itemContainer}>
                 <View style={styles.itemView} onPress={()=>{alert('Press !!!')}}>
                     <TouchableOpacity style={styles.itemText} onPress={()=>this.handleEditViewItem(index, 'view')}>
-                        <Text style={{fontSize: 20,fontWeight: 'bold'}}>Code: {recipe.key.trim()}</Text>
+                        <Text style={{fontSize: 20,fontWeight: 'bold'}}>Code: {recipe.code.trim()}</Text>
                         <Text style={{fontSize: 18}}>Name: {recipe.name.trim()}</Text>
                     </TouchableOpacity>
                     <Animated.View style={[styles.itemImage, this.position.getLayout()]} {...this.panResponder.panHandlers}>

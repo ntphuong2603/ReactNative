@@ -10,9 +10,21 @@ export const getRecipes = async(keyList) => {
     })
     const resultList = []
     results.forEach(result=>{
-        resultList.push({key: result[0], ...JSON.parse(result[1])})
+        //resultList.push({key: result[0], ...JSON.parse(result[1])})
+        resultList.push({...JSON.parse(result[1])})
     })
     return resultList;
+}
+
+export const getRecipe = async(key) => {
+    const recipe =  await AsyncStorage.getItem(key, (error, result)=>{
+        if (error){
+            console.log(error);
+        } else {
+            return result;
+        }
+    })
+    return recipe;
 }
 
 export const write_recipe = async(key, value) => {

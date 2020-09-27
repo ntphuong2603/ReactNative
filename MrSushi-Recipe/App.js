@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import { AsyncStorage, StyleSheet, View, Alert } from 'react-native';
 import { BottomTab} from './components/componentsIndex';
 import { OrderRecipe, SearchRecipe, InputRecipe } from './screens/indexMainScreen';
-import { write_recipe } from './components/recipe_io';
+import { delete_recipe, getRecipe, getRecipes, write_recipe } from './components/recipe_io';
 
 export default class App extends Component {
   constructor(){
     super();
     this.state={
-      selectedTab:0,
+      selectedTab:2,
       searchResults: [],
       orderList: [],
       recipeList: [],
@@ -27,8 +27,24 @@ export default class App extends Component {
   async componentDidMount(){
     await AsyncStorage.getAllKeys()
       .then(results=>{
-        //console.log('Keylist: ',results);
+        console.log('Keylist: ',results);
         this.setState({recipeList: results})
+        /*
+        const newRecipe = {}
+        results.forEach(async (key)=>{
+          //delete_recipe(key);
+          newRecipe['key'] = key.split(' - ')[0].trim();
+          newRecipe['name'] = key.split(' - ')[1].trim();
+          newRecipe['list'] = []
+          newRecipe['pict'] = {}
+          newRecipe.pict['take_out'] = ''
+          const oldRecipe = new  Promise(getRecipe(key))
+          newRecipe.list = oldRecipe.ingredient
+          newRecipe.pict['dine_in'] = oldRecipe['imgPath']
+          console.log(oldRecipe, newRecipe);
+        })
+        console.log(newRecipe);
+        */
       })
   }
 
@@ -46,15 +62,15 @@ export default class App extends Component {
 
   handleUpdateRecipeList = () => {
     const {recipeList, recipe, searchResults} = this.state
-    const key = recipe.code.trim()
-    delete recipe.code
-    const value = {...recipe}
-    console.log(key,value);
-    if (write_recipe(key, value)){
-      const obj = {}
-      obj[key] = value;
+    const key = `${recipe.code.trim()} - ${recipe.name.trim()}`
+    //delete recipe.code
+    //const value = {...recipe}
+    console.log(key,recipe);
+    if (write_recipe(key, recipe)){
+      //const obj = {}
+      //obj[key] = value;
       recipeList.push(key)
-      searchResults.push(obj)
+      searchResults.push(recipe)
       this.setState({ recipeList: recipeList, 
                       recipe: {...this.resetRecipe()}, 
                       searchResults: searchResults})

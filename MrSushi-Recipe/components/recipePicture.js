@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { StyleSheet, View, Image, Animated, Text, PanResponder, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, View, Image, Animated, Text, PanResponder, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker'
 import { FONT_SIZE_BASE, SCREEN_WIDTH } from './constants';
 import { Camera } from 'expo-camera';
@@ -24,49 +24,69 @@ export default RecipePicture = (props) => {
             position.setValue({x:gesture.dx,y:0})
         },
         onPanResponderRelease: (event, gesture) => {
-            position.flattenOffset();
-            if (gesture.dx >= 0){
-                Animated.timing(position, {
-                    toValue:{x:0, y:0},
-                    duration: 300,
-                    useNativeDriver: false,
-                }).start(()=>{
-                    setTakeOut(false)
-                })
-            } else if (gesture.dx < 0){
-                Animated.timing(position, {
-                    toValue:{x:-OFFSET_VALUE, y:0},
-                    duration: 300,
-                    useNativeDriver: false,
-                }).start(()=>{
-                    setTakeOut(true)
-                })
+            //position.flattenOffset();
+            if (gesture.dx >= 30){
+                goToDine_IN()
+            } else if (gesture.dx < -30){
+                goToTake_OUT()
             }
         },
     })
     
-    const moveToCamera = () => {
+    const goToDine_IN = () => {
+        Animated.spring(position, {
+            toValue:{x:0, y:0},
+            duration: 300,
+            useNativeDriver: false,
+        }).start(()=>{
+            setTakeOut(false);
+            setIsCameraOn(false);
+        })
+    }
+
+    const goToTake_OUT = () => {
+        Animated.spring(position, {
+            toValue:{x:-OFFSET_VALUE, y:0},
+            duration: 300,
+            useNativeDriver: false,
+        }).start(()=>{
+            setTakeOut(true);
+            setIsCameraOn(false);
+        })
+    }
+
+    const goToCamera = () => {
+        Animated.spring(position, {
+            toValue:{x:-(OFFSET_VALUE*2), y:0},
+            duration: 100,
+            useNativeDriver: false,
+        }).start(()=>
+            setIsCameraOn(true)
+        )
+    }
+
+    const leftFunc = () => {
         if (isCameraOn){
-            getPicture()
-            Animated.spring(position, {
-                toValue:{x:(takeOut?-(OFFSET_VALUE):0), y:0},
-                duration: 300,
-                useNativeDriver: false,
-            }).start(()=>{setTakeOut(false);setIsCameraOn(false)})
-        } else {    
-            Animated.spring(position, {
-                toValue:{x:-(OFFSET_VALUE*2), y:0},
-                duration: 300,
-                useNativeDriver: false,
-            }).start(()=>{setIsCameraOn(true)})
+            takeOut ? goToTake_OUT() : goToDine_IN()
+        } else {
+            getPicture(false)
+        }
+    }
+
+    const rightFunc = () => {
+        if (isCameraOn){
+            getPicture(true)
+            takeOut ? goToTake_OUT() : goToDine_IN()
+        } else {
+            goToCamera();
         }
     }
 
     let camera=null;
 
-    const getPicture = async () => {
+    const getPicture = async (frCamera) => {
         let url = '';
-        if (isCameraOn){
+        if (frCamera){
             try {
                 if (camera){
                     let photo = await camera.takePictureAsync();
@@ -84,7 +104,6 @@ export default RecipePicture = (props) => {
                 url = res.uri
             }
         }
-        console.log(url);
         props.handleRecipe(url, 'pict', takeOut?'OUT':'IN')
     }
 
@@ -108,10 +127,12 @@ export default RecipePicture = (props) => {
                 </View>
             </Animated.View>
             {btnView && <View style={[styles.containerRow, { justifyContent: 'space-around',}]}>
-                <TouchableOpacity disabled={isCameraOn} style={[styles.btnIll, {borderColor: '#00bfff'}]} onPress={()=>getPicture(false)}>
-                    <FontAwesome name='file-picture-o' size={30} color='#00bfff'/>
+                <TouchableOpacity style={[styles.btnIll, {borderColor: !isCameraOn?'#00bfff':'#dc143c',}]} onPress={leftFunc}>
+                    {!isCameraOn ? 
+                    <FontAwesome name={'file-picture-o'} size={30} color={'#00bfff'}/>:
+                    <FontAwesome name={'arrow-circle-o-left'} size={30} color={'#dc143c'}/>}
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.btnIll,{borderColor: '#daa520'}]} onPress={moveToCamera} >
+                <TouchableOpacity style={[styles.btnIll,{borderColor: '#daa520'}]} onPress={rightFunc} >
                     <FontAwesome name='camera' size={30} color='#daa520'/>
                 </TouchableOpacity>
             </View>}
